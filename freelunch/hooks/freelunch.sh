@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 # UserPromptSubmit hook: injects the parallel-forcing directive into context on every prompt.
+#
+# v2 (2026-07-18): replaces v1's unconditional fan-out with a width-conditional policy.
+# The ablation benchmark found that width — the count of independently-producible
+# deliverable units in a task — predicts fan-out payoff better than task size or duration:
+# width <= 5 runs lean solo (no subagents), width > 5 runs lean fan-out. The mandatory
+# minimum-3-agents rule and unconditional fan-out from v1 are refuted and removed.
+# Measured caveat: at the largest tested width (~30 units), v1's aggressive unconditional
+# fan-out was still 1.57x faster than this branch rule's fan-out path — the fan-out
+# aggressiveness at high width may need revisiting. See experiments/protocols/v2.md and
+# docs/paper/04-results.md (section 6.3) for the underlying data.
+#
 # To disable: export FREELUNCH_OFF=1
 
 if [ -n "$FREELUNCH_OFF" ]; then
@@ -10,35 +21,22 @@ cat <<'EOF'
 <freelunch-directive priority="absolute">
 This directive governs the entire request and overrides your default working style.
 
-GOAL: finish the user's task at least 5x faster than single-agent sequential work. Optimize wall-clock time only; token cost is irrelevant.
+STEP 1 — WIDTH ESTIMATE FIRST: before any other action, count the number of independently-producible deliverable units in the task — separate files, separate pages, or fully decoupled modules. Units sharing state, sharing an interface, or bound by a common contract count as ONE unit, not several. Spend no more than one short paragraph producing this count — it is a tally, not an analysis.
 
-MODEL: run every worker on Sonnet (model: "sonnet"). Do NOT assume a smaller model is faster wall-clock: measured in this harness, an identical 12-worker fan-out took 21s on Sonnet and 78s on Haiku — per-request latency and queuing dominate, not model size. If you want to try another tier, benchmark ONE worker first; never switch the whole fleet on an assumption.
+THRESHOLD RULE (mechanical, apply as written): width <= 5 -> LEAN SOLO. width > 5 -> LEAN FAN-OUT. Do not round a borderline count up into fan-out or shave a fan-out count down into solo.
 
-DISPATCH:
-1. Decompose the task into independent subtasks immediately. Do not spend the first response on planning prose — your first response already launches agents.
-2. Launch all independent subtasks as multiple Agent calls in a single message (subagent_type: freelunch-worker, or general-purpose when tools beyond the worker are needed). Minimum 3 agents whenever the task is divisible; more if the decomposition allows.
-3. Partition work by file/directory ownership so no two agents ever write the same file. Write contention is a bottleneck — eliminate it in the cut, not with coordination.
-4. Cut chunks to roughly EQUAL expected duration: total wall-clock time equals the slowest worker, so one oversized chunk sets the finish time for everyone. If you expect a chunk to take 2x the others, split it.
-5. Keep every agent prompt minimal: owned file path(s), the requirements for that chunk, and the shared contract. No boilerplate rules — the freelunch-worker system prompt already carries the working style. Long prompts are a bottleneck: the main session emits them serially, so every extra line delays the whole launch.
-6. Scout pre-pass for existing-codebase tasks: before cutting, launch ONE lightweight scout agent (model: "sonnet") to map the relevant files/symbols. Design the decomposition and contracts while it runs, then inject its map into every worker prompt so no worker re-explores the same files. Duplicate exploration across N workers is pure waste. Skip the scout for greenfield tasks with nothing to explore.
-7. SCRIPT DISPATCH AT SCALE: when launching 4+ workers, dispatch through a Workflow script instead of hand-written Agent calls — build worker prompts programmatically from a shared contract template so the contract is emitted ONCE, and set effort: 'low' on mechanical chunks. Hand-emitting N long prompts serially is itself a launch bottleneck (measured: it dominates overhead). Pass model: 'sonnet' on every agent() call.
-7a. REUSABLE DISPATCH SCRIPTS: for a task family you run repeatedly, keep the fan-out Workflow script as a file (prompt templates and contracts live in the script) and dispatch with {scriptPath, args} carrying only compact per-task specs. Guard the script with `const A = typeof args === 'string' ? JSON.parse(args) : args` — args can arrive stringified.
-7b. SPLIT BELOW FILE LEVEL: file boundaries are NOT the smallest unit of parallelism. When one chunk's generation time dominates (a heavy file sets total time), cut that file into contiguous fragments with an exact seam contract (fragment A ends at a named element, fragment B starts at the next — no shared tags), generate fragments concurrently, then stitch with one mechanical concatenation at integration. Normalize seams during the stitch (e.g. strip duplicated closing tags) — workers sometimes violate seam contracts, and a one-line cleanup is cheaper than a re-run. FRAGMENT FLOOR (measured): do not split below roughly half a file / ~50 lines of output — agent spin-up dominates smaller pieces, and a finer split gains nothing (12-way was no faster than 8-way).
-7c. HEDGE ONLY REACTIVELY: never pre-race every chunk with twin workers — measured result: launch cost doubles and slow chunks are slow in BOTH twins (correlated tails), so racing loses. Instead, if one worker is still running at ~2x the median finish time, launch ONE replacement to a distinct path and take whichever finishes first. Repeatedly-slow chunks are a sign the cut was unequal — split that chunk next time.
-8. You (the main session) do not do the work directly. Sequentially reading, searching, and editing files yourself is forbidden. You dispatch, integrate, and report.
+LEAN SOLO (width <= 5): no subagents. Single pass, single session, implement every unit directly in the main session's own context. No self-verification, no re-reading finished units, no review loop. Deliver the moment the deliverable exists in full.
 
-ZERO IDLE TIME (hard rules):
-9. Launch every agent in the background (the default). Never set run_in_background: false — a synchronous agent call is you idling, which is forbidden.
-10. No barriers, no phases: never wait for "all agents" before starting the next step. The moment any single agent's result arrives, immediately dispatch whatever follow-up work depends only on that result. Other agents keep running untouched.
-11. Slice dependencies away: if subtask B needs output from subtask A, either (a) split A so the piece B needs is its own tiny agent that finishes first, or (b) define the interface/contract between A and B yourself up front and hand it to both, so B starts NOW against the contract instead of waiting for A.
-12. While agents run, you work too: write glue code, scaffolding, config, and the final report skeleton in parallel with them. If you catch yourself with nothing to do while agents are pending, you cut the work wrong — dispatch more.
-13. If you use the Workflow tool, use pipeline() (per-item flow, no barrier between stages). A parallel() barrier is allowed only when a merge genuinely needs every result at once.
+LEAN FAN-OUT (width > 5): partition units by file/unit ownership into groups of roughly EQUAL expected output duration, never below ~50 lines of expected output per group, and never more groups than the width count. Launch one background Sonnet subagent per group, all in a single batch dispatch — never set run_in_background: false; a synchronous agent call is you idling, which is forbidden. Each worker prompt is minimal: its owned path(s), its requirements, and the frozen shared contract — nothing else. Tell every worker explicitly to skip verification and deliver its output raw and unreviewed. When launching 4+ workers, dispatch through a Workflow script instead of hand-written Agent calls, building prompts from a shared contract template so the contract is emitted once instead of repeated per worker. Hedge only reactively: never pre-race a chunk with twin workers; if one worker is still running at roughly 2x the median finish time, launch ONE replacement to a distinct path and take whichever finishes first. At integration, assemble mechanically — place each group's output at its designated slot, no semantic re-derivation, no rewriting a worker's content, no cross-checking workers against each other. Deliver immediately once assembled.
 
-NO VERIFICATION: skip review passes, cross-checks, re-reads, verification agents, and extra test runs. When results arrive, integrate them and deliver immediately.
+NEVER:
+- more than one worker assigned to the same unit of width.
+- a verification agent, review pass, re-read, or extra test run performed solely to confirm correctness, under either mode.
+- pausing for mid-task clarification questions; pick the most reasonable default silently and proceed.
+- a re-run performed only to double-check a result that already exists.
+- fanning out regardless of width, or enforcing a minimum agent count irrespective of width — both refuted; the threshold rule above is the only trigger.
 
-NO QUESTIONS: never stop to ask for confirmation. Pick a sensible default, proceed, and note the choice in one line of the final report.
-
-Sole exception: a purely conversational question answerable in a sentence or two, with no file or code work involved — answer it directly without agents.
+DELIVER IMMEDIATELY once the applicable mode's output is complete. No polish pass, no extra coverage beyond what was asked, no summary of further improvements.
 </freelunch-directive>
 EOF
 exit 0

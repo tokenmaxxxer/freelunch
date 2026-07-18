@@ -2,7 +2,7 @@
 
 *"The free lunch is over" — so said Herb Sutter in 2005: no more speed for free, go parallel. This plugin takes the deal literally.*
 
-A Claude Code plugin (this repo is its marketplace, `freelunch`; the plugin lives in [freelunch/](freelunch/)) that forces every task onto concurrent background Sonnet agents with zero idle time. It optimizes wall-clock time only, skips quality-verification passes by design, and every rule in it survived an elimination benchmark — the ones that didn't are banned inside the plugin itself, with the numbers.
+A Claude Code plugin (this repo is its marketplace, `freelunch`; the plugin lives in [freelunch/](freelunch/)) that estimates a task's *width* — its count of independently-producible deliverable units — before doing anything else, then branches: a lean solo pass with no subagents for narrow tasks (width 5 or fewer), or a lean fan-out of concurrent background Sonnet agents for wide ones. It optimizes wall-clock time only, skips quality-verification passes by design, and every rule in it survived an elimination benchmark — the ones that didn't are banned inside the plugin itself, with the numbers.
 
 ## Measured results
 
@@ -27,22 +27,18 @@ Tested and rejected along the way (kept as in-directive bans):
 - `freelunch/agents/freelunch-worker.md` — Sonnet-pinned worker agent that finishes one chunk with no verification pass.
 - `freelunch/workflows/site-fanout.js`, `freelunch/workflows/code-fanout.js` — reusable fan-out scripts; dispatch passes only compact per-task specs via `args`, prompt templates and contracts live in the script.
 
-The directive's core rules:
+The directive's core rules (v2, width-conditional):
 
-1. Decompose immediately; the first response already launches agents (3+ in one message, all in the background).
-2. Every worker runs on Sonnet (measured fastest — see above).
-3. Partition by file ownership — no two agents ever write the same file.
-4. Cut chunks to roughly equal expected duration; the slowest worker sets total time.
-5. Keep agent prompts minimal — the main session emits prompts serially, so long prompts delay the whole launch.
-6. Existing-codebase tasks start with one scout agent whose file map is injected into every worker prompt.
-7. Fan-outs of 4+ workers dispatch via a Workflow script; recurring task families reuse a script file with `{scriptPath, args}`.
-8. Heavy files split into contiguous fragments (floor: ~50 lines each) with exact seam contracts, stitched by one mechanical concatenation with seam normalization.
-9. Dependencies are sliced away with up-front interface contracts so dependent work starts immediately — never waits.
-10. No barriers or phases: the moment one agent finishes, its follow-up dispatches while the rest keep running.
-11. Hedging is reactive only — a straggler at ~2x median finish time gets one replacement racer.
-12. No review passes, no cross-checks, no confirmation questions.
+1. Width estimate first: count independently-producible deliverable units in the task. Units that share state, an interface, or a contract count as ONE, not several. This is a tally, not an analysis — one short paragraph, then decide.
+2. Width 5 or fewer -> **lean solo**: no subagents, single pass in the main session, no self-verification, no re-reading finished units. Deliver as soon as the work is done.
+3. Width over 5 -> **lean fan-out**: partition by file/unit ownership into roughly equal-duration groups (floor: ~50 lines of expected output each), never more groups than the width count.
+4. Every fan-out worker runs on Sonnet, launched in the background in a single batch — never synchronous.
+5. Worker prompts are minimal: owned path(s), requirements, and the frozen shared contract. Workers are told explicitly to skip verification.
+6. Fan-outs of 4+ workers dispatch via a Workflow script built from a shared contract template, so the contract is emitted once.
+7. Hedging is reactive only — a straggler at ~2x median finish time gets one replacement racer, never a pre-race of every chunk.
+8. Integration is mechanical assembly: each group's output goes to its slot, no rewriting, no cross-checking workers against each other, no review pass, under either mode.
 
-Sole exception: purely conversational questions with no file or code work.
+Removed from v1 as refuted by the benchmark: the minimum-3-agents mandate, unconditional fan-out regardless of task width, and sub-file fragment splitting as a default technique.
 
 ## Install
 
@@ -73,9 +69,9 @@ export FREELUNCH_OFF=1   # hook injects nothing
 ## Caveats
 
 - Skipping verification is by design. It cost nothing on the benchmarks above because the specs were precise; when a contract is wrong, seam bugs ship (one duplicated `</html>` did). Turn the plugin off for work where you need to trust the result.
-- Tiny single-file tasks pay agent spin-up overhead with nothing to parallelize; only pure conversation is exempted, so expect overkill there.
-- Speedup grows with task size: fixed costs (spin-up, dispatch, notifications) are ~35s of every run, so longer tasks approach and pass 5x.
+- Width, not task size, drives the branch: a long but coupled task (e.g. a refactor touching one call graph) counts as narrow and runs lean solo; a short but decomposable task (many independent files) counts as wide and fans out.
+- At the largest width tested so far (~30 independent units), v1's older unconditional fan-out still ran 1.57x faster than v2's fan-out path on the same task. The width threshold and lean-fan-out tuning at the high end of the range are provisional and may need revisiting as more data comes in — see `experiments/protocols/v2.md` and `docs/paper/04-results.md` (section 6.3) for the underlying measurements.
 
 ---
 
-v0.1.0 — by Jung Jiwon & Lee Jongkwan.
+v0.2.0 — by Jung Jiwon & Lee Jongkwan.
