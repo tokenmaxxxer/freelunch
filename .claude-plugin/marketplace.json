@@ -23,6 +23,11 @@
       "name": "no-mock",
       "source": "./no-mock",
       "description": "Steers deliverables toward production-runnable structure at generation time — real persistence, real integration seams, no silent mocks. Pure direction, no verification machinery."
+    },
+    {
+      "name": "tokenmaxxxer-env",
+      "source": "./tokenmaxxxer-env",
+      "description": "One-install environment bundle: installs the whole tokenmaxxxer steering stack via dependencies."
     }
   ]
 }
