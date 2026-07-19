@@ -1,7 +1,7 @@
 {
   "name": "tokenmaxxxer-env",
-  "version": "0.2.0",
-  "description": "One-install tokenmaxxxer environment: pulls in the whole steering stack (freelunch, terse, blueprint, no-mock, scout) as dependencies. Contains no code of its own.",
+  "version": "0.3.0",
+  "description": "One-install tokenmaxxxer environment: pulls in the whole steering stack (freelunch, terse, blueprint, no-mock, scout) as dependencies, and routes the four per-plugin hook directives into one merged per-prompt injection (~60% smaller); standalone hooks stand down via a marker file while the router is active.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"
   },

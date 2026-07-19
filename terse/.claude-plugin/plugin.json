@@ -1,6 +1,6 @@
 {
   "name": "terse",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Output-token compression tuned for the tokenmaxxxer stack: strips conversational filler, code echoes, formatting scaffolding, and repeated summaries from the main session's prose while exempting code, worker prompts, frozen contracts, and safety-critical messages. Levels via /terse.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"

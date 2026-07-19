@@ -1,6 +1,6 @@
 {
   "name": "no-mock",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Steers every deliverable toward production-runnable structure at generation time: real persistence and integration seams from the first line, no silent downgrade to mocks, honest execution claims. Pure direction — no gates, no sniffers, no verification passes.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"

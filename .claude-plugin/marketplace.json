@@ -32,7 +32,7 @@
     {
       "name": "tokenmaxxxer-env",
       "source": "./tokenmaxxxer-env",
-      "description": "One-install environment bundle: installs the whole tokenmaxxxer steering stack via dependencies."
+      "description": "One-install environment bundle: installs the whole tokenmaxxxer steering stack via dependencies and routes the four per-plugin hook directives into one merged per-prompt injection (−46% injection size)."
     }
   ]
 }

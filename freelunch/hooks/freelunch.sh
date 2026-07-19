@@ -29,6 +29,15 @@ if [ -n "$FREELUNCH_OFF" ]; then
   exit 0
 fi
 
+# Routed mode (v0.2.3): when the tokenmaxxxer-env router hook is active it
+# emits the merged stack directive (this plugin's rules included), so the
+# standalone injection stands down. The router touches this marker on every
+# prompt; a marker older than a day means the router is gone — resume.
+ROUTER_MARKER="${HOME}/.claude/tokenmaxxxer.router"
+if [ -f "$ROUTER_MARKER" ] && [ -n "$(find "$ROUTER_MARKER" -mmin -1440 2>/dev/null)" ]; then
+  exit 0
+fi
+
 cat <<'EOF'
 <freelunch-directive priority="absolute">
 This directive governs the entire request and overrides your default working style.

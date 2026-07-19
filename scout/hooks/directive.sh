@@ -20,6 +20,15 @@ if [ -n "$SCOUT_OFF" ]; then
   exit 0
 fi
 
+# Routed mode (v0.1.2): when the tokenmaxxxer-env router hook is active it
+# emits the merged stack directive (this plugin's rules included), so the
+# standalone injection stands down. The router touches this marker on every
+# prompt; a marker older than a day means the router is gone — resume.
+ROUTER_MARKER="${HOME}/.claude/tokenmaxxxer.router"
+if [ -f "$ROUTER_MARKER" ] && [ -n "$(find "$ROUTER_MARKER" -mmin -1440 2>/dev/null)" ]; then
+  exit 0
+fi
+
 cat <<'EOF'
 <scout-directive priority="high">
 Before building anything that competes for a user's choice — an app, site, service, content product, or tool in a category where others already ship — scout the field first. You cannot hit a quality bar you have never looked at. This directive steers direction BEFORE generation; it adds no checks after.

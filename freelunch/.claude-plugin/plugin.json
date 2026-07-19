@@ -1,6 +1,6 @@
 {
   "name": "freelunch",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Width-conditional: estimates independent deliverable units first, then runs a lean solo pass (width <= 5) or a lean fan-out of concurrent background Sonnet agents (width > 5) with zero idle time and no verification passes.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"

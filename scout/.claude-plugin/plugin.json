@@ -1,6 +1,6 @@
 {
   "name": "scout",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Know the field before you build: a bounded, judgment-gated reconnaissance protocol (Camp benchmarking + Kano expectations + saturation stop rule) that identifies best-in-class exemplars and the customer expectation baseline, compresses them into a scout brief, and feeds it into the build direction. Pure steering — never post-build comparison.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"

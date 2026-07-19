@@ -30,7 +30,7 @@ Either way you get the `tokenmaxxxer-env` bundle, whose dependencies pull in the
 | [blueprint](blueprint/) | Sixteen-archetype architecture database with a deterministic classify/recommend CLI; each archetype carries the fan-out contract to freeze before dispatching workers. |
 | [no-mock](no-mock/) | Steers deliverables toward production-runnable structure: real persistence and integration seams from the first line, no silent mocks. |
 | [scout](scout/) | Pre-build reconnaissance (Camp benchmarking + Kano + saturation stop): finds best-in-class exemplars and the category's must-be baseline, compresses them into a scout brief that steers the build. Measured: restores the must-be features baseline builds systematically omit. |
-| [tokenmaxxxer-env](tokenmaxxxer-env/) | One-install bundle: pulls the whole stack in as dependencies. |
+| [tokenmaxxxer-env](tokenmaxxxer-env/) | One-install bundle: pulls the whole stack in as dependencies, and its router hook merges the four per-plugin directives into one per-prompt injection (12,095 → 6,544 chars, −46%); standalone hooks stand down via a marker file while the router is active, and resume automatically if the bundle is removed. |
 
 ## Team rollout
 
@@ -55,4 +55,5 @@ Prefer a subset? Enable individual plugins instead (`"terse@tokenmaxxxer": true`
 
 - `install.sh` — the one-shot installer described above.
 - `.claude-plugin/marketplace.json` — the marketplace manifest.
+- `tests/hooks_test.sh` — before/after test for the router: standalone emission, merged emission, stand-down/resume, kill switches, size delta.
 - `freelunch/`, `terse/`, `blueprint/`, `no-mock/`, `scout/`, `tokenmaxxxer-env/` — one directory per plugin, each with its own README and benchmark notes.
