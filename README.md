@@ -56,4 +56,3 @@ Prefer a subset? Enable individual plugins instead (`"terse@tokenmaxxxer": true`
 - `install.sh` — the one-shot installer described above.
 - `.claude-plugin/marketplace.json` — the marketplace manifest.
 - `freelunch/`, `terse/`, `blueprint/`, `no-mock/`, `scout/`, `tokenmaxxxer-env/` — one directory per plugin, each with its own README and benchmark notes.
-- `docs/`, `experiments/` — the freelunch benchmark suite, results, and paper.
