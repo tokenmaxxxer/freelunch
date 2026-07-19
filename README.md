@@ -1,8 +1,25 @@
 # tokenmaxxxer / claude-plugins
 
-A Claude Code plugin marketplace by Jung Jiwon & Lee Jongkwan. Every plugin here ships with the benchmark numbers that justify its rules — policies that lost their ablation get removed, not shipped.
+A Claude Code plugin marketplace by Jung Jiwon & Lee Jongkwan: a steering stack that makes coding agents faster and cheaper **without lowering the deliverable bar**. Every plugin ships with the benchmark numbers that justify its rules — policies that lose their ablation get removed, not shipped.
 
-The stack's thesis: **no verification anywhere** — every plugin steers before generation; none inspects after. That is what keeps the savings free.
+The stack's thesis: **no verification anywhere.** Every plugin steers *before* generation — what the field expects, what structure fits, how real it must be, how fast it gets built, how tersely it gets reported. Nothing inspects after. That is what keeps the savings free.
+
+## Install
+
+One line, no clone (works with the standalone CLI or with only the VSCode extension):
+
+```
+curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/claude-plugins/main/install.sh | bash
+```
+
+Or from any Claude Code session:
+
+```
+/plugin marketplace add tokenmaxxxer/claude-plugins
+/plugin install tokenmaxxxer-env@tokenmaxxxer
+```
+
+Either way you get the `tokenmaxxxer-env` bundle, whose dependencies pull in the whole stack. One interactive step remains: open `/plugin` → marketplaces → tokenmaxxxer and enable **auto-update**, so future stack additions arrive automatically (there is no CLI switch for this toggle). Individual plugins install the same way: `/plugin install terse@tokenmaxxxer`.
 
 ## Plugins
 
@@ -15,27 +32,9 @@ The stack's thesis: **no verification anywhere** — every plugin steers before 
 | [scout](scout/) | Pre-build reconnaissance (Camp benchmarking + Kano + saturation stop): finds best-in-class exemplars and the category's must-be baseline, compresses them into a scout brief that steers the build. Measured: restores the must-be features baseline builds systematically omit. |
 | [tokenmaxxxer-env](tokenmaxxxer-env/) | One-install bundle: pulls the whole stack in as dependencies. |
 
-## Install everything (one bundle)
+## Team rollout
 
-Inside any Claude Code CLI session:
-
-```
-/plugin marketplace add tokenmaxxxer/claude-plugins
-/plugin install tokenmaxxxer-env@tokenmaxxxer
-```
-
-Or from a shell:
-
-```
-claude plugin marketplace add tokenmaxxxer/claude-plugins
-claude plugin install tokenmaxxxer-env@tokenmaxxxer
-```
-
-Installing the bundle resolves and installs every dependency automatically. Individual plugins install the same way (`/plugin install terse@tokenmaxxxer`, …).
-
-## Team rollout (auto-install for a whole repo)
-
-Commit this to your project's `.claude/settings.json` and everyone who opens the repo gets the whole stack installed and enabled after a one-time trust prompt — enabling the bundle pulls in and enables every dependency, and plugins added to the bundle later reach the team through its version bumps with no settings change:
+Commit this to your project's `.claude/settings.json` and everyone who opens the repo gets the stack installed and enabled after a one-time trust prompt. Plugins added to the bundle later reach the team through its version bumps, with no settings change:
 
 ```json
 {
@@ -52,16 +51,9 @@ Commit this to your project's `.claude/settings.json` and everyone who opens the
 
 Prefer a subset? Enable individual plugins instead (`"terse@tokenmaxxxer": true`, …).
 
-Or run the one-shot installer — no clone needed:
-
-```
-curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/claude-plugins/main/install.sh | bash
-```
-
-It works even with only the VSCode extension (it finds the CLI bundled inside the extension, and falls back to writing settings directly). The installer registers the marketplace (GitHub source when run standalone, the local checkout when run from a clone), installs the `tokenmaxxxer-env` bundle (dependencies pull in the whole stack), refreshes the marketplace once, and prints the one interactive step left: enabling auto-update for the marketplace in `/plugin`, so future stack additions arrive automatically. Reading a script before piping it to bash is always fair — it's short.
-
 ## Repo layout
 
+- `install.sh` — the one-shot installer described above.
 - `.claude-plugin/marketplace.json` — the marketplace manifest.
-- `freelunch/` — the plugin itself (hooks, agents, workflows), plus its README and installer.
+- `freelunch/`, `terse/`, `blueprint/`, `no-mock/`, `scout/`, `tokenmaxxxer-env/` — one directory per plugin, each with its own README and benchmark notes.
 - `docs/`, `experiments/` — the freelunch benchmark suite, results, and paper.
