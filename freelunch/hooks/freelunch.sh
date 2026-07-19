@@ -6,10 +6,13 @@
 # deliverable units in a task — predicts fan-out payoff better than task size or duration:
 # width <= 5 runs lean solo (no subagents), width > 5 runs lean fan-out. The mandatory
 # minimum-3-agents rule and unconditional fan-out from v1 are refuted and removed.
-# Measured caveat: at the largest tested width (~30 units), v1's aggressive unconditional
-# fan-out was still 1.57x faster than this branch rule's fan-out path — the fan-out
-# aggressiveness at high width may need revisiting. See experiments/protocols/v2.md and
-# docs/paper/04-results.md (section 6.3) for the underlying data.
+# Measured caveat (softened 2026-07-19): in the validation data, v1's aggressive
+# unconditional fan-out beat this branch rule's fan-out path at the largest tested
+# width (~30 units), but the 72-run shipped-plugin sweep failed to reproduce that
+# deficit (v2 133.7s vs v1's 129.8s, within run-to-run spread) — treat it as a
+# variance question at high width, not a measured gap. Full-suite result for this
+# policy: 1.50x geomean speedup, quality tied, cheaper tokens than baseline.
+# See experiments/results.csv and docs/paper/04-results.md (section 5.5).
 #
 # To disable: export FREELUNCH_OFF=1
 

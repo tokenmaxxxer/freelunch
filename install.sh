@@ -5,7 +5,7 @@
 set -u
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-MARKET="freelunch"
+MARKET="tokenmaxxxer"
 PLUGIN="freelunch"
 
 if [ ! -f "$ROOT/.claude-plugin/marketplace.json" ]; then
