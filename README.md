@@ -52,7 +52,13 @@ Commit this to your project's `.claude/settings.json` and everyone who opens the
 
 Prefer a subset? Enable individual plugins instead (`"terse@tokenmaxxxer": true`, …).
 
-Using only the VSCode extension (its chat has no `/plugin` commands)? Each plugin directory ships an `install.sh` that finds the CLI bundled inside the extension and installs through it — see the plugin's README for details.
+Or run the one-shot installer from a checkout (works even with only the VSCode extension — it finds the CLI bundled inside the extension, and falls back to writing settings directly):
+
+```
+git clone https://github.com/tokenmaxxxer/claude-plugins && ./claude-plugins/install.sh
+```
+
+The installer registers the marketplace, installs the `tokenmaxxxer-env` bundle (dependencies pull in the whole stack), refreshes the marketplace once, and prints the one interactive step left: enabling auto-update for the marketplace in `/plugin`, so future stack additions arrive automatically.
 
 ## Repo layout
 

@@ -65,7 +65,7 @@ Removed from v1 as refuted by the benchmark: the minimum-3-agents mandate, uncon
 
 ```
 git clone https://github.com/tokenmaxxxer/claude-plugins.git
-cd claude-plugins && ./freelunch/install.sh
+cd claude-plugins && ./install.sh   # repo-root installer: installs the whole stack via the tokenmaxxxer-env bundle
 ```
 
 Then reload the VSCode window. The installer prefers a PATH `claude`, then the extension's bundled CLI, and as a last resort writes `~/.claude/settings.json` directly (backing up the original). Idempotent — safe to re-run.
