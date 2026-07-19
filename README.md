@@ -35,7 +35,7 @@ Installing the bundle resolves and installs every dependency automatically. Indi
 
 ## Team rollout (auto-install for a whole repo)
 
-Commit this to your project's `.claude/settings.json` and everyone who opens the repo gets the stack installed and enabled after a one-time trust prompt:
+Commit this to your project's `.claude/settings.json` and everyone who opens the repo gets the whole stack installed and enabled after a one-time trust prompt — enabling the bundle pulls in and enables every dependency, and plugins added to the bundle later reach the team through its version bumps with no settings change:
 
 ```json
 {
@@ -45,14 +45,12 @@ Commit this to your project's `.claude/settings.json` and everyone who opens the
     }
   },
   "enabledPlugins": {
-    "freelunch@tokenmaxxxer": true,
-    "terse@tokenmaxxxer": true,
-    "blueprint@tokenmaxxxer": true,
-    "no-mock@tokenmaxxxer": true,
-    "scout@tokenmaxxxer": true
+    "tokenmaxxxer-env@tokenmaxxxer": true
   }
 }
 ```
+
+Prefer a subset? Enable individual plugins instead (`"terse@tokenmaxxxer": true`, …).
 
 Using only the VSCode extension (its chat has no `/plugin` commands)? Each plugin directory ships an `install.sh` that finds the CLI bundled inside the extension and installs through it — see the plugin's README for details.
 
