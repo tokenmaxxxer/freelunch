@@ -30,6 +30,11 @@
       "description": "Pre-build reconnaissance: identify best-in-class exemplars and the customer expectation baseline (Camp benchmarking + Kano + saturation stop rule), compress into a scout brief that steers the build. Bounded and judgment-gated — never a research report, never post-build comparison."
     },
     {
+      "name": "no-footgun",
+      "source": "./no-footgun",
+      "description": "Direction-only security steering: names the threat patterns for the surface being built so the secure pattern is chosen at write time — surface-gated, cascading custom rules, zero review passes or scans."
+    },
+    {
       "name": "tokenmaxxxer-env",
       "source": "./tokenmaxxxer-env",
       "description": "One-install environment bundle: installs the whole tokenmaxxxer steering stack via dependencies."

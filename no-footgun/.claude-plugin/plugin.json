@@ -1,0 +1,8 @@
+{
+  "name": "no-footgun",
+  "version": "0.1.0",
+  "description": "Direction-only security steering: names the threat patterns for the surface being built (injection, deserialization, XSS, secrets, paths, SSRF, IDOR) so the secure pattern is chosen at write time — no review passes, no scans, no post-hoc steps. Surface-gated so irrelevant tasks pay nothing.",
+  "author": {
+    "name": "Jung Jiwon & Lee Jongkwan"
+  }
+}
