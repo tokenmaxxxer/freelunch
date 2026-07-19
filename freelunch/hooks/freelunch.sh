@@ -12,7 +12,6 @@
 # deficit (v2 133.7s vs v1's 129.8s, within run-to-run spread) — treat it as a
 # variance question at high width, not a measured gap. Full-suite result for this
 # policy: 1.50x geomean speedup, quality tied, cheaper tokens than baseline.
-# See experiments/results.csv (research repo).
 #
 # v2.2 (2026-07-19): adds a research-task width rule. The deliverable-unit
 # definition is code-shaped (files/modules), so research tasks always collapsed
