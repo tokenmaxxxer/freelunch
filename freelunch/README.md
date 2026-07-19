@@ -2,7 +2,7 @@
 
 *"The free lunch is over" — so said Herb Sutter in 2005: no more speed for free, go parallel. This plugin takes the deal literally.*
 
-A Claude Code plugin (distributed via the [`tokenmaxxxer` marketplace](../README.md), one directory up) that estimates a task's *width* — its count of independently-producible deliverable units — before doing anything else, then branches: a lean solo pass with no subagents for narrow tasks (width 5 or fewer), or a lean fan-out of concurrent background Sonnet agents for wide ones. It optimizes wall-clock time only, skips quality-verification passes by design, and every rule in it survived an elimination benchmark — the ones that didn't are banned inside the plugin itself, with the numbers.
+A Claude Code plugin (distributed via the [`tokenmaxxxer` marketplace](../README.md), one directory up) that freezes the task's shared contract, estimates its *width* — the count of independently-producible deliverable units given that frozen contract — and then branches: a lean solo pass with no subagents for narrow tasks (width 2 or fewer, or tiny units), or a lean fan-out of concurrent background Sonnet agents when width is 3+ with ~100+ expected lines per unit. It optimizes wall-clock time only, skips quality-verification passes by design, and every rule in it survived an elimination benchmark — the ones that didn't are banned inside the plugin itself, with the numbers.
 
 ## Measured results
 
@@ -28,7 +28,7 @@ Tested and rejected along the way (kept as in-directive bans):
 - Unconditional fan-out (the v1 policy): median 0.96x across the suite — parallel dispatch below ~5 units of width loses its own overhead.
 - Pre-racing every chunk with twin workers: slow chunks were slow in both twins (correlated tails), and doubled launch cost.
 - Splitting fragments below ~50 output lines: 12-way was no faster than 8-way — agent spin-up dominates small pieces.
-- Sub-file splitting in general: symbol-boundary and 250-line-cap cuts both lost to a solo pass at every file size tested, up to ~1500 lines.
+- Sub-file splitting *as done in v1* (no frozen signatures, no packing): symbol-boundary and 250-line-cap cuts both lost to a solo pass at every file size tested, up to ~1500 lines. **Partially overturned in v2.4-2.5** — with each unit's export-signature line frozen verbatim in the contract and units packed to ~100-200 lines per worker, symbol-level fan-out won 2.7x at equal quality (see below). The v1-style naive cut stays banned.
 - Haiku workers: identical 12-worker fan-out took 78s on Haiku vs 21s on Sonnet — per-request latency dominates, "smaller = faster" is false here.
 
 ## How it works
@@ -37,18 +37,25 @@ Tested and rejected along the way (kept as in-directive bans):
 - `agents/freelunch-worker.md` — Sonnet-pinned worker agent that finishes one chunk with no verification pass.
 - `workflows/site-fanout.js`, `workflows/code-fanout.js` — reusable fan-out scripts; dispatch passes only compact per-task specs via `args`, prompt templates and contracts live in the script.
 
-The directive's core rules (v2, width-conditional):
+The directive's core rules (v2.5, contract-first width-conditional):
 
-1. Width estimate first: count independently-producible deliverable units in the task. Units that share state, an interface, or a contract count as ONE, not several. This is a tally, not an analysis — one short paragraph, then decide. Research tasks (the deliverable is gathered information, not files) count independent search angles instead of the single final report, gated so quick lookups stay solo; their integration step allows one semantic synthesis pass (v0.2.2, smoke-tested but not yet benchmarked).
-2. Width 5 or fewer -> **lean solo**: no subagents, single pass in the main session, no self-verification, no re-reading finished units. Deliver as soon as the work is done.
-3. Width over 5 -> **lean fan-out**: partition by file/unit ownership into roughly equal-duration groups (floor: ~50 lines of expected output each), never more groups than the width count.
-4. Every fan-out worker runs on Sonnet, launched in the background in a single batch — never synchronous.
+1. Contract split, then width: first identify any shared contract (schema, interface, vocabulary, style guide) freezable upfront in roughly a page, then count independently-producible units ASSUMING it is frozen. Units merge only under non-freezable coupling: shared mutable state (the same *lines* — distinct self-contained symbols in one file count separately when each unit's export-signature line is frozen verbatim), sequential dependency, or an interface still being co-designed. Sharing a freezable contract is NOT a merge reason. Research tasks (the deliverable is gathered information, not files) count independent search angles instead of the single final report, gated so quick lookups stay solo; their integration step allows one semantic synthesis pass (v0.2.2, smoke-tested but not yet benchmarked).
+2. Width 2 or fewer, or units too small to amortize dispatch -> **lean solo**: no subagents, single pass in the main session, no self-verification, no re-reading finished units. Deliver as soon as the work is done.
+3. Width 3+ with ~100+ expected lines per unit -> **lean fan-out**: freeze the contract verbatim, then partition by file- or symbol-level ownership into roughly equal-duration groups packed to ~100-200 expected lines each, never more groups than the width count. Symbol-level groups are assembled by fixed-order concatenation and each such worker starts from its frozen export-signature line.
+4. Every fan-out worker runs on Sonnet, launched in the background in a single batch — never synchronous. Workers on mechanical contract-pinned groups run at low reasoning effort; default effort where the unit needs judgment beyond the contract.
 5. Worker prompts are minimal: owned path(s), requirements, and the frozen shared contract. Workers are told explicitly to skip verification.
 6. Fan-outs of 4+ workers dispatch via a Workflow script built from a shared contract template, so the contract is emitted once.
 7. Hedging is reactive only — a straggler at ~2x median finish time gets one replacement racer, never a pre-race of every chunk.
 8. Integration is mechanical assembly: each group's output goes to its slot, no rewriting, no cross-checking workers against each other, no review pass, under either mode.
 
-Removed from v1 as refuted by the benchmark: the minimum-3-agents mandate, unconditional fan-out regardless of task width, and sub-file fragment splitting as a default technique.
+Removed from v1 as refuted by the benchmark: the minimum-3-agents mandate, unconditional fan-out regardless of task width, and naive sub-file fragment splitting as a default technique.
+
+## v2.3-v2.5 revisions (2026-07-20, workflow-harness A/Bs — not yet re-run through the headless suite)
+
+- **v2.3 — solo-collapse fix.** The v2 width rules counted any shared contract as ONE unit and ignored per-unit volume, so exactly the tasks where fan-out pays most (multi-file deliverables over a freezable contract) routed solo. Routing probe, 12 ground-truth-labeled tasks x old/new directive (24 router agents): old misrouted 4 of 6 should-fan tasks to solo; new scored 12/12 with zero false fan-outs.
+- **v2.4 — symbol-level width.** One worker per self-contained symbol within a file, mechanical concat assembly, vs a whole-module solo control; same frozen contract, judged by a 60-assert battery pre-registered before generation. 2.7x wall-clock at equal logic quality. The single observed failure class — a worker dropping the `export` keyword — is prevented by freezing each unit's signature line in the contract: zero seam defects across all subsequent signature-frozen runs (76 workers) vs 1/14 without.
+- **v2.5 — packing and effort.** 7-arm sweep: 2-symbol groups matched 1-symbol wall-clock within run variance while spending 43% fewer tokens (per-worker fixed overhead ~23k tokens); 4-symbol groups keep saving tokens at ~+70% latency; low-effort workers on contract-pinned mechanical units ran 5x faster at equal quality (single run).
+- **Mid-size scale check.** 12-file zero-dependency REST API (5 domains with cross-references, file-backed atomic persistence, bearer auth), contract ~90 lines — deliberately past the one-page guideline. 7 fan workers vs 1 solo agent, judged by a pre-registered 34-assert end-to-end test (boot, auth, validation, filters, kill-and-restart persistence): fan 47.8s vs solo 125.0s (2.6x), **both 34/34**, zero cross-worker integration defects on first boot. Token cost 4.4x. Untested still: genuinely multi-wave projects, brownfield repos, >15 files.
 
 ## Install
 
@@ -85,4 +92,4 @@ export FREELUNCH_OFF=1   # hook injects nothing
 
 ---
 
-v0.2.2 — by Jung Jiwon & Lee Jongkwan.
+v0.2.5 — by Jung Jiwon & Lee Jongkwan.
