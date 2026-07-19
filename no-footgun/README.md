@@ -32,7 +32,9 @@ export NO_FOOTGUN_OFF=1
 
 ## Honest status
 
-**Unbenchmarked.** The rule content tracks OWASP/OpenSSF consensus and the incumbent's ~25-pattern taxonomy, and the directive mechanics (surface gate, direction-only, worker inheritance) reuse structures measured elsewhere in this stack — but no A/B has yet measured whether this directive raises secure-pattern selection rates or what it costs on the dom-infra-style short-task tail. The planned protocol exists: vulnerability-prone task prompts, ON/OFF arms, pre-registered vulnerability checklist scoring, same harness as the freelunch evals.
+**Benchmarked once, no measurable effect at the tested difficulty.** An ON/OFF A/B (8 feature-request tasks, each phrased with zero security language so the vulnerable pattern is the path of least resistance — SQL injection, path traversal, command injection, secret leak, SSRF, XSS, unsafe YAML, IDOR; pre-registered deterministic scorer; Sonnet workers) scored **8/8 secure in both arms**. The Sonnet baseline already picks parameterized queries, argv arrays, `textContent`, `yaml.safe_load`, ownership re-checks, and URL parsing without any prompting — there was no residual insecure selection for the directive to correct. (Two tasks initially read as insecure in both arms; both were scorer false positives, corrected by file inspection.)
+
+This is not evidence the directive is worthless — it is evidence the frontier-model baseline is at ceiling on straightforward single-file tasks, which is also why the incumbent leans on post-generation inspection rather than stronger steering. Where a direction-only directive would plausibly still earn its place, all **untested** here: weaker or smaller worker models; complex contexts where the surrounding contract actively pushes toward the unsafe pattern; and project-specific rules the model cannot infer (the cascading `no-footgun.md`). The mechanics also cost nothing structurally — injected at prompt-assembly time, no extra LLM call — but per-arm wall-clock was not isolated. Data: `experiments/nofootgun-eval-v0.1.json` in the research clone.
 
 ---
 
