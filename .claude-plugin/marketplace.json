@@ -25,6 +25,11 @@
       "description": "Steers deliverables toward production-runnable structure at generation time — real persistence, real integration seams, no silent mocks. Pure direction, no verification machinery."
     },
     {
+      "name": "scout",
+      "source": "./scout",
+      "description": "Pre-build reconnaissance: identify best-in-class exemplars and the customer expectation baseline (Camp benchmarking + Kano + saturation stop rule), compress into a scout brief that steers the build. Bounded and judgment-gated — never a research report, never post-build comparison."
+    },
+    {
       "name": "tokenmaxxxer-env",
       "source": "./tokenmaxxxer-env",
       "description": "One-install environment bundle: installs the whole tokenmaxxxer steering stack via dependencies."

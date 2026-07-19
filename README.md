@@ -12,6 +12,7 @@ The stack's thesis: **no verification anywhere** — every plugin steers before 
 | [terse](terse/) | Compresses conversational output prose (−38% output tokens measured); code, worker prompts, contracts, and safety-critical text are verbatim zones. Levels via `/terse`. |
 | [blueprint](blueprint/) | Sixteen-archetype architecture database with a deterministic classify/recommend CLI; each archetype carries the fan-out contract to freeze before dispatching workers. |
 | [no-mock](no-mock/) | Steers deliverables toward production-runnable structure: real persistence and integration seams from the first line, no silent mocks. |
+| [scout](scout/) | Pre-build reconnaissance (Camp benchmarking + Kano + saturation stop): finds best-in-class exemplars and the category's must-be baseline, compresses them into a scout brief that steers the build. Measured: restores the must-be features baseline builds systematically omit. |
 | [tokenmaxxxer-env](tokenmaxxxer-env/) | One-install bundle: pulls the whole stack in as dependencies. |
 
 ## Install everything (one bundle)
@@ -47,7 +48,8 @@ Commit this to your project's `.claude/settings.json` and everyone who opens the
     "freelunch@tokenmaxxxer": true,
     "terse@tokenmaxxxer": true,
     "blueprint@tokenmaxxxer": true,
-    "no-mock@tokenmaxxxer": true
+    "no-mock@tokenmaxxxer": true,
+    "scout@tokenmaxxxer": true
   }
 }
 ```
