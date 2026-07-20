@@ -90,6 +90,8 @@ export FREELUNCH_OFF=1   # hook injects nothing
 - At the largest width tested (~30 independent units), early validation data showed v1's unconditional fan-out beating v2's fan-out path — but the 72-run sweep of the shipped plugin failed to reproduce that deficit (v2 134s vs v1's 130s, within this task's run-to-run spread). Treat high-width tuning as a variance question needing more repetitions, not a measured gap.
 - The width branch runs on the model's own width tally, not on anyone's label. At the margin they can disagree: in the sweep, two tasks the suite labeled width 6 were counted narrower by the model and ran solo — both still matched or beat baseline.
 
+- v0.2.6 adds the MODE RE-DECISION clause: the width tally re-runs mid-turn when a build is born from a conversational opening (question/complaint → the model decides to build) or when a work-list materializes that the opening tally could not see; it counts implementation units, not symptom counts. This clause comes from a field observation (interactive sessions sliding from question to solo build), not from a measured win: a 4-design pre-registered ablation (`experiments/rewidth-eval.md`, research clone) could not reproduce the failure mode — current routing already re-tallied in every synthetic transcript, and in the conversational-entry design the solo it chose was the correct width. Shipped on operator judgment; if a captured real-session transcript later shows the failure, the clause gets a targeted benchmark, and if that benchmark shows no effect it comes back out, per stack policy.
+
 ---
 
-v0.2.5 — by Jung Jiwon & Lee Jongkwan.
+v0.2.6 — by Jung Jiwon & Lee Jongkwan.
