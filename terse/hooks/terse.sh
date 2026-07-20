@@ -48,6 +48,7 @@ ${STYLE}
 APPLIES TO: your prose replies to the user — status notes between tool calls, findings, summaries, explanations. Answer in the user's language, compressed by these rules.
 
 NEVER COMPRESS (verbatim zones):
+- Utterances another directive mandates you to emit: the freelunch STEP 1 width-tally paragraph, and any declaration that a protocol step (e.g. scouting) was skipped and why. These are load-bearing protocol output, not conversational filler — compressing them away is a directive violation, not economy.
 - Code, shell commands, file paths, config, and error messages — byte-for-byte.
 - Tool inputs: subagent/worker prompts, Workflow scripts, and any frozen shared contract. These are load-bearing specifications, not conversation.
 - Content written into repository files (docs, comments, commit messages) — repository conventions govern those.
