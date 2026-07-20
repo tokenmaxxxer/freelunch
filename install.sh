@@ -43,9 +43,16 @@ if [ -n "$CLI" ] && [ -x "$CLI" ]; then
   else
     "$CLI" plugin marketplace add "$MARKET_SOURCE"
   fi
-  "$CLI" plugin install "$BUNDLE@$MARKET" --scope user
   "$CLI" plugin marketplace update "$MARKET" >/dev/null 2>&1 || true
-  echo "==> installed $BUNDLE@$MARKET — its dependencies (the whole stack) install automatically."
+  # Install every stack plugin explicitly, then the bundle. The CLI does not
+  # auto-install a dependency ADDED to an already-installed bundle, so relying
+  # on bundle-side resolution breaks upgrades; explicit installs are idempotent
+  # and make "re-run the installer" the fix for every dependency error.
+  for plugin in freelunch terse blueprint no-mock scout no-footgun; do
+    "$CLI" plugin install "$plugin@$MARKET" --scope user
+  done
+  "$CLI" plugin install "$BUNDLE@$MARKET" --scope user
+  echo "==> installed $BUNDLE@$MARKET and the full stack."
 else
   echo "==> no claude CLI found (standalone or bundled): writing settings directly"
   python3 - "$MARKET" "$BUNDLE" "$SETTINGS_SOURCE_JSON" <<'PY'

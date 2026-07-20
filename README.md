@@ -36,9 +36,7 @@ Or from any Claude Code session:
 /plugin install tokenmaxxxer-env@tokenmaxxxer
 ```
 
-Either way you get the `tokenmaxxxer-env` bundle, whose dependencies pull in the whole stack. One interactive step remains: open `/plugin` → marketplaces → tokenmaxxxer and enable **auto-update**, so future stack additions arrive automatically (there is no CLI switch for this toggle). Individual plugins install the same way: `/plugin install terse@tokenmaxxxer`.
-
-**Upgrading an existing install past a bundle version that adds a dependency** (e.g. env ≥ 0.3.3, which added `no-footgun`): the CLI does not auto-install a new dependency of an already-installed bundle and fails to enable it with "depends on X, which is not installed". Run the one-liner it suggests once — `claude plugin install no-footgun@tokenmaxxxer` — and the bundle enables normally. Fresh installs are unaffected.
+Either way you get the `tokenmaxxxer-env` bundle, whose dependencies pull in the whole stack. One interactive step remains: open `/plugin` → marketplaces → tokenmaxxxer and enable **auto-update**, so future stack additions arrive automatically (there is no CLI switch for this toggle). Individual plugins install the same way: `/plugin install terse@tokenmaxxxer`. If an update ever complains about a missing dependency, re-run the install one-liner — it is idempotent and installs the full stack explicitly.
 
 ## Plugins
 
