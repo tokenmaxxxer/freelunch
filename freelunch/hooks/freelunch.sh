@@ -103,6 +103,19 @@
 # choice (Haiku fan-out 78s vs 21s). Rule logic smoke-tested on four payloads;
 # no end-to-end benchmark.
 #
+# v2.8 (2026-07-21): closes the INLINE loophole v2.6 opened. v2.6 split solo by
+# whether a unit "consumes disposable context" but let its inline branch cover
+# "an edit whose target is already in context" — which launders any delegated
+# turn into an inline one: read the file, then call the edit in-context. Observed
+# immediately, in the session that wrote the rule: four consecutive build turns
+# ran inline on that justification. The test is now mechanical and about the CALL
+# rather than its residue — if finishing the turn needs any repo/environment tool
+# call, it is DELEGATED, single units and one-line edits included. INLINE is only
+# the turn answerable from context already present. Not hook-enforceable:
+# subagent tool calls pass through the same PreToolUse path, so a blanket block
+# on the session's Read/Edit would break the workers too. Rationale-only; not
+# benchmarked.
+#
 # To disable: export FREELUNCH_OFF=1
 
 if [ -n "$FREELUNCH_OFF" ]; then
@@ -119,9 +132,10 @@ RESEARCH TASKS: width = independent search angles needing sustained digging, not
 
 THRESHOLD RULE (mechanical): width >= 3 AND ~100+ expected lines (or comparable effort) per unit → LEAN FAN-OUT; otherwise LEAN SOLO. Never round a borderline count either way; unknowable volume → estimate from comparable past outputs, not hope.
 
-LEAN SOLO: single pass, no fan-out, no self-verification, no re-reading, no review loop. Pick the executor by whether the unit CONSUMES DISPOSABLE CONTEXT — file reads, tool loops, code generation, research digging — that the long-lived conversation session should not accumulate:
-- INLINE (parent executes): the turn consumes no throwaway context — reasoning from what is already in context, a pure-conversation reply, or an edit whose target is already in context. Deliver the moment it exists. You cannot delegate the conversation itself; shipping a present-context reply to a worker only pays setup cost and relays it back lossily.
-- DELEGATED (one background worker): any solo unit that would pull disposable context into the session. Dispatch a SINGLE background worker owning the work as subagent_type freelunch-worker (Sonnet-pinned) — never run_in_background: false — so the conversation session stays orchestrator-only: interruptible for new input, out of compaction, never holding the worker's reads/tool output/intermediate reasoning. Worker prompt = owned paths + requirements + any frozen contract; worker skips verification and delivers raw. File-producing work lands on disk — the parent points to it, does not re-echo; a text result relays through the parent once. No second worker, no re-run, no verification pass on what returns.
+LEAN SOLO: single pass, no fan-out, no self-verification, no re-reading, no review loop. Executor test, mechanical: does finishing this turn need ANY repo or environment tool call (read, grep, edit, write, shell, test run, fetch)?
+- YES → DELEGATED, always. One unit counts; a one-line edit counts. Dispatch ONE background worker owning the whole unit as subagent_type freelunch-worker (Sonnet-pinned), never run_in_background: false. The conversation session makes no repo tool calls of its own — it stays orchestrator-only, interruptible for new input, compaction-resistant, and never accumulates the worker's reads, tool output, or intermediate reasoning. Worker prompt = owned paths + requirements + any frozen contract; the worker skips verification and delivers raw. File output lands on disk: the parent points to it, never re-echoes it; a text result relays through the parent once. No second worker, no re-run, no verification pass on what returns.
+- NO → INLINE: the turn is answerable from context already present — conversation, judgment, design. Deliver the moment it exists. The conversation itself cannot be delegated; this is the only inline branch.
+Never launder a delegated turn into an inline one by reading the file first and calling the edit "in-context" — the test is whether the tool call is needed at all, not whether its output has already landed in the session.
 
 LEAN FAN-OUT: freeze the contract verbatim first — it travels in every worker prompt. Partition by file/symbol ownership into groups of ~100-200 expected lines (measured optimum), roughly equal expected duration, never more groups than width. Symbol-level workers must start from their frozen export-signature line (measured: prevents the one observed seam-defect class). Contract-pinned mechanical groups dispatch at LOW reasoning effort (measured safe); judgment-needing groups at default. Launch one background worker per group in a single batch as subagent_type freelunch-worker (Sonnet-pinned; any other agent type must carry model: sonnet explicitly) — never run_in_background: false. Worker prompt = owned paths + requirements + frozen contract, nothing else; tell workers to skip verification and deliver raw. 4+ workers → dispatch via a Workflow script built from a shared contract template. Hedge reactively only: one replacement if a worker runs ~2x median; never pre-raced twins. Integration is mechanical placement — no rewriting, no cross-checking. RESEARCH EXCEPTION: search-angle fan-outs integrate through one semantic synthesis pass (dedupe, reconcile, note disagreements as such), never new searches or re-runs.
 

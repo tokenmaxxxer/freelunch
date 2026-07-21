@@ -2,7 +2,7 @@
 
 *"The free lunch is over" — so said Herb Sutter in 2005: no more speed for free, go parallel. This plugin takes the deal literally.*
 
-A Claude Code plugin (distributed via the [`tokenmaxxxer` marketplace](../README.md), one directory up) that freezes the task's shared contract, estimates its *width* — the count of independently-producible deliverable units given that frozen contract — and then branches: a lean solo pass with no subagents for narrow tasks (width 2 or fewer, or tiny units), or a lean fan-out of concurrent background Sonnet agents when width is 3+ with ~100+ expected lines per unit. It optimizes wall-clock time only, skips quality-verification passes by design, and every rule in it survived an elimination benchmark — the ones that didn't are banned inside the plugin itself, with the numbers.
+A Claude Code plugin (distributed via the [`tokenmaxxxer` marketplace](../README.md), one directory up) that freezes the task's shared contract, estimates its *width* — the count of independently-producible deliverable units given that frozen contract — and then branches: a lean solo pass for narrow tasks (width 2 or fewer, or tiny units), itself delegated to a single background worker unless the turn needs no repo tool call at all, or a lean fan-out of concurrent background Sonnet agents when width is 3+ with ~100+ expected lines per unit. It optimizes wall-clock time only, skips quality-verification passes by design, and every rule in it survived an elimination benchmark — the ones that didn't are banned inside the plugin itself, with the numbers.
 
 ## Measured results
 
