@@ -79,13 +79,14 @@ which reads it, removes the marker with `git rm`, and continues.
 - **terse** compresses report prose; dispatch chooses the channel and
   granularity.
 
-## Chat-fronted mode (opt-in)
+## Chat-fronted mode (default in a chat session)
 
-The default stance is strict: git is the *only* channel, and the agent never
-merges. But on the **plan / web path** — a subscription session rather than the
-API-billed GitHub Action — the *initial input has to arrive in chat* (there is no
-issue-triggered start on that path). `export DISPATCH_CHAT_FRONTED=1` fits that
-case without giving up the record:
+On a headless git-event run the stance is strict: git is the only channel and the
+agent does not merge. But whenever a human is working through a **live chat
+session** — the **plan / web path**, a subscription session rather than the
+API-billed GitHub Action, where the *initial input has to arrive in chat* (there
+is no issue-triggered start there) — dispatch operates chat-fronted, with no flag
+to set, without giving up the record:
 
 - **Input in chat, record in git.** A requirement is mirrored to an **issue**;
   work happens on a **PR** that references it; chat feedback is posted as a **PR
@@ -99,7 +100,8 @@ case without giving up the record:
   the agent's own parked question.
 
 Everything else is unchanged. The mode moves only the human's *input medium*; the
-record and the merge still land on git. Off by default.
+record and the merge still land on git. It needs no configuration — it is simply
+how dispatch behaves in a chat session, and is moot on a headless run.
 
 ## What it does not do
 
