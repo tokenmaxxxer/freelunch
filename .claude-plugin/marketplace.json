@@ -45,6 +45,11 @@
       "description": "Work-unit protocol: one approval gate at the front, then uninterrupted execution. A proposal states the request, the constraints, and the write set; approval freezes it; a PreToolUse gate refuses edits outside it and commits without the Proposal: trailer; SessionStart rebuilds state from the repository."
     },
     {
+      "name": "dispatch",
+      "source": "./dispatch",
+      "description": "Git-as-sole-channel protocol: an agent communicates with the oracle above it only through git, so every report is a git write and every git event is a trigger — report IS the next actor's trigger. Reports route by lifetime; a needed decision is delivered to the remote as a blocking marker and label, not asked in chat, and the run terminates rather than idling. A PreToolUse gate holds the oracle boundary; SessionStart rebuilds the parked state from the remote."
+    },
+    {
       "name": "tokenmaxxxer-env",
       "source": "./tokenmaxxxer-env",
       "description": "One-install environment bundle: installs the whole tokenmaxxxer steering stack via dependencies."

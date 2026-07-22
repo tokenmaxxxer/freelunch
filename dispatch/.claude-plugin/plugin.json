@@ -1,0 +1,8 @@
+{
+  "name": "dispatch",
+  "version": "0.1.0",
+  "description": "Git-as-sole-channel protocol: an agent communicates with the oracle above it only through git, so every report is a git write and every git event is a trigger — report IS the next actor's trigger. Reports route by lifetime (one mutable status surface plus discrete settling points); a needed decision is delivered to the remote as a blocking marker and label, not asked in chat, and the run terminates rather than idling in-process. A PreToolUse gate holds the oracle boundary (no second decision request, no landing or resolving your own), a SessionStart hook rebuilds the parked/live state from the remote. Scope is the channel only — no verification, no content review.",
+  "author": {
+    "name": "Jung Jiwon & Lee Jongkwan"
+  }
+}
