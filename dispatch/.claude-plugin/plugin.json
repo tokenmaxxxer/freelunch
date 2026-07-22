@@ -1,7 +1,7 @@
 {
   "name": "dispatch",
-  "version": "0.4.0",
-  "description": "Git-as-sole-channel protocol: an agent communicates with the oracle above it only through git, so every report is a git write and every git event is a trigger — report IS the next actor's trigger. When a git event wakes a run, an orientation discipline has it establish from git and the triggering event WHAT it was woken to do before acting. Reports route by lifetime (one mutable status surface plus discrete settling points); a needed decision is delivered to the remote as a blocking marker and label, not asked in chat, and the run terminates rather than idling in-process. A PreToolUse gate holds the oracle boundary (no second decision request, no landing or resolving your own), a SessionStart hook rebuilds the parked/live state from the remote. In a live chat session (the plan/web path) it operates chat-fronted by default: input arrives in chat but is mirrored to git as the record — a requirement becomes an issue, feedback becomes a PR comment — and the agent executes the oracle's acts as delegate, merging only on an explicit user approval that it records to the PR, never while a decision is parked. Scope is the channel only — no verification, no content review.",
+  "version": "0.5.0",
+  "description": "Chat-to-git record-keeping discipline: when you work through chat, the conversation becomes the durable git record — a requirement becomes an issue, the work a pull request that Closes it, feedback becomes PR comments — and a PR merges only on an explicit, recorded user approval. Direction only, no gates: so a person or agent with no memory of the session can reconstruct intent, work, and rationale from git alone. Composes with warrant, doctrine, and terse.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"
   }
