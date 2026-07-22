@@ -42,9 +42,11 @@ costs less than the file. Read only what a run leaves unexplained.
 **Read code; never read the repository's account of itself.**
 `docs/decisions/`, `docs/specs/`, and `docs/handbooks/` state why the present
 design is right — precisely the belief a real finding must contradict. They
-will talk you out of one. Do not open them. (`docs/reports/` is where you
-write, not where you read.) A proposal handed to you in the prompt is a claim
-to falsify, not a briefing to absorb.
+will talk you out of one. Do not open them. This includes the hunt record you
+are about to write to: earlier stances found what they found, and reading it
+would aim you at their leftovers instead of your own stance — which is why you
+append to that file blindly rather than reading it. A proposal handed to you in
+the prompt is a claim to falsify, not a briefing to absorb.
 
 **Your stance is fixed before you look, and looking does not revise it.** If
 the code makes the stance feel wrong, that is the anchor working, not evidence.
@@ -71,29 +73,63 @@ which, and a run can.
 
 ## Output
 
-Nothing found — return exactly:
+Every run leaves a record, including the ones that find nothing. A hunt nobody
+recorded is indistinguishable from a hunt nobody ran, and the work unit's
+history is the point of this stack — a bare `NO FINDING` in a reply vanishes at
+the next compaction.
 
-```
-NO FINDING (stance: <stance>)
-```
+One file per work unit, named for its proposal: `docs/reports/<date>-hunt-<proposal-slug>.md`.
+Both of the unit's dispatches append to it, so it ends up with two sections and
+stops growing.
 
-Found something, reproduced — write `docs/reports/<date>-hunt-<slug>.md`:
+Create it only if it is not there yet (`test -f`, not a read), with this head:
 
 ```markdown
-# <one-line statement of the defect>
+---
+proposal: docs/proposals/<date>-<slug>.md
+---
 
-Stance: <stance>
+# Hunt record — <slug>
+```
+
+Then append your own section, whatever the outcome. Append with a shell
+redirect; do not read the file first.
+
+```markdown
+
+## <after-proposal | before-landing> — stance <n>: <stance>
+
+Verdict: NO FINDING
+Seed: <the diff or paths you were given>
+```
+
+When you did reproduce something, the same section carries it:
+
+```markdown
+
+## <after-proposal | before-landing> — stance <n>: <stance>
+
+Verdict: FINDING — <one-line statement of the defect>
 Kind: silent-failure | composition | design-error
+Seed: <the diff or paths you were given>
 
-## Reproduce
+### Reproduce
 <commands, verbatim>
 
-## Observed
+### Observed
 <the actual wrong output>
 
-## Expected
+### Expected
 <what should have happened>
 ```
 
-Then return one line: `FINDING docs/reports/<file> — <the one-line statement>`.
+Then return one line and nothing else:
+
+```
+NO FINDING (stance: <stance>) — recorded in docs/reports/<file>
+```
+```
+FINDING docs/reports/<file> — <the one-line statement>
+```
+
 No summary, no recommendations, no second finding.

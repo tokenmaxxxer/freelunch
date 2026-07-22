@@ -42,6 +42,11 @@ WRITE IT, THEN STOP. Create the proposal, say it is ready, and end the turn. Do 
 
 ON APPROVAL: set `status: approved`, create a branch, and build without stopping. The write set is frozen — every edit lands in a listed path. Choices that come up inside the scope are settled by the proposal's stated constraints and defaults and recorded in `decisions/`; they are never bounced back as questions.
 
+WRITE DOWN WHAT DID NOT WORK, AT THE MOMENT IT DOES NOT WORK. The proposal grows one more section during the build — `## What did not work` — and lines get appended to it as the build goes, never saved up for landing. By landing, the failure has fallen out of your context and what you would write is a summary of the success. Appending is a write, not a pause, so it does not interrupt anything. Two conditions, both mechanical:
+- you wrote something and then undid or replaced it -> one line: what it was, what broke it.
+- something you expected to hold did not -> one line: what you expected, what actually happened instead.
+That is the entire record. Not a transcript, not every attempt, and not a worker's internal dead ends — a worker that fails and retries inside its own task keeps that to itself. What belongs here is only what the NEXT person would otherwise try again, and it is the reason someone who was not in this conversation can pick the work up: the code shows what stands, this shows what already fell over.
+
 SCOPE EXCEEDED: when the work turns out to need a file outside the write set, finish what the proposal covers, stop, and report what was found. Do not widen the set, do not ask mid-build. The remainder becomes the next proposal.
 
 EVERY COMMIT CARRIES ITS WARRANT: the message ends with a trailer naming the proposal.
@@ -60,7 +65,9 @@ Take the stance at index `(dispatch count mod 5)`, counting from `.warrant-hunt.
 2. assume this guard goes silent when its own input is malformed — make it go silent
 3. assume the rule as written cannot hold — find the state nothing maintains
 4. assume the write set cannot carry this work — find the path the build will need that the proposal does not list
-It returns one reproduced finding or nothing. A finding lands in `docs/reports/` and reaches the user at the next turn boundary, in one line; a hunter dispatched before landing reports into the landing exchange, because that is the last moment the finding is cheap. Never wait on it, never interrupt work for it, never dispatch a second while one is running — the guard refuses that anyway.
+Tell it three things beyond the stance: the proposal's path, which transition this is (`after-proposal` or `before-landing`), and that its record goes to `docs/reports/<date>-hunt-<proposal-slug>.md`. Both dispatches append to that one file, and both leave a section even when they find nothing — a hunt nobody recorded reads exactly like a hunt nobody ran, and the `proposal:` field is what keeps the record attached to the unit that caused it, the same way the commit trailer does.
+
+It returns one reproduced finding or nothing. A finding reaches the user at the next turn boundary, in one line; a hunter dispatched before landing reports into the landing exchange, because that is the last moment the finding is cheap. Never wait on it, never interrupt work for it, never dispatch a second while one is running — the guard refuses that anyway.
 
 COMPOSITION: freelunch decides how the approved work is executed (solo or fan-out) — the write set is its ownership map. doctrine decides where documents land. This directive decides only what may begin and when.
 
