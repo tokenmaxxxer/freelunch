@@ -48,7 +48,7 @@ Either way you get the `tokenmaxxxer-env` bundle, whose dependencies pull in the
 | [no-mock](no-mock/) | Steers deliverables toward production-runnable structure: real persistence and integration seams from the first line, no silent mocks. |
 | [scout](scout/) | Pre-build reconnaissance (Camp benchmarking + Kano + saturation stop): finds best-in-class exemplars and the category's must-be baseline, compresses them into a scout brief that steers the build. Measured: restores the must-be features baseline builds systematically omit. |
 | [no-footgun](no-footgun/) 🔒 | Direction-only security steering: names the threat patterns for the surface being built (injection, deserialization, XSS, secrets, paths, SSRF, IDOR) so the secure pattern is chosen at write time. Surface-gated, cascading custom rules, zero review passes. Unbenchmarked as of v0.1.0. |
-| [doctrine](doctrine/) 📁 | Documentation placement: every document lives in one of six lifetime-based buckets under `docs/` (`decisions/`, `handbooks/`, `reports/`, `specs/`, `proposals/`, `_assets/`). A directive classifies at write time; a `PreToolUse` gate mechanically refuses writes that land elsewhere. Unbenchmarked as of v0.1.0. |
+| [doctrine](doctrine/) 📁 | Documentation placement: every document lives in one of six lifetime-based buckets under `docs/` (`decisions/`, `handbooks/`, `reports/`, `specs/`, `proposals/`, `_assets/`). A directive classifies at write time; a `PreToolUse` gate refuses writes that land under `docs/` outside them. Unbenchmarked as of v0.1.0. |
 | [tokenmaxxxer-env](tokenmaxxxer-env/) | One-install bundle: pulls the whole stack in as dependencies. |
 
 ## Team rollout

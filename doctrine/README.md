@@ -30,33 +30,30 @@ which falsifies a document fixes it in the same turn, and that no document
 restates a fact another one owns. Surface-gated: inert on turns that touch no
 documentation.
 
-**`PreToolUse` gate** — enforces the one rule that needs no judgment. A write is
-refused unless it lands in a bucket, with the buckets and the classification
-test in the refusal message. It reads the tool input (a path string) before the
-write happens; it never reads a finished document.
+**`PreToolUse` gate** — enforces the one rule that needs no judgment, inside
+`docs/` and nowhere else. A write landing under `docs/` outside the six buckets
+is refused, with the buckets and the classification test in the refusal message.
+It reads the tool input (a path string) before the write happens; it never reads
+a finished document.
 
-Scope differs on the two sides of `docs/`. Inside a `docs/` tree every file is
-governed regardless of extension — `_assets/` exists so that images and
-attachments have a bucket, and a PNG loose under `docs/` is as much a violation
-as a stray note. Outside it, only `.md`/`.mdx` are governed; source and config
-are none of this gate's business.
+Inside a `docs/` tree every file is governed regardless of extension —
+`_assets/` exists so images and attachments have a bucket, and a PNG loose under
+`docs/` is as much a violation as a stray note. Outside `docs/` the gate is
+silent: source, config, notes beside a module, and definitions the platform
+loads by path (`SKILL.md`, `agents/*.md`, `commands/*.md`) are not its business.
+That documents should not scatter across the repository is still doctrine — it
+is carried by the directive, as direction rather than refusal.
 
-The rule is an allow-list rather than a `docs/`-only check, because
-`SUMMARY.md` dropped at the repository root is the exact failure the plugin
-exists to prevent — a gate that only guards inside `docs/` would wave it
-through. Allowed outside the buckets: `README.md` at any level, the root files
-an ecosystem fixes by name (`LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`,
-`CODE_OF_CONDUCT.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`), anything inside
-a dot-directory or a vendored/generated tree, and whatever the repository adds:
+Exceptions inside `docs/`: `docs/README.md`, a dot-directory or vendored tree
+that already exists on disk, and whatever the repository adds:
 
 ```sh
-export DOCTRINE_ALLOW="content,blog,_posts/drafts"
+export DOCTRINE_ALLOW="docs/package.json,docs/site"
 ```
 
 Each entry matches a whole path segment or a path prefix from the project root.
-A documentation-site repository (Hugo `content/`, Docusaurus `blog/`, Jekyll
-`_posts/`) needs this — without it the gate refuses writes the site layout
-requires.
+A documentation-site repository whose generator keeps config under `docs/`
+needs this.
 
 That split is deliberate. A path can prove a document is in the wrong place;
 it cannot tell you whether a design note is a `spec` or a `proposal`. The

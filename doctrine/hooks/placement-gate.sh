@@ -1,25 +1,30 @@
 #!/usr/bin/env bash
-# PreToolUse hook (Write|Edit|NotebookEdit): refuses markdown writes that would
-# land anywhere other than a doctrine bucket.
+# PreToolUse hook (Write|Edit|NotebookEdit): refuses writes under docs/ that
+# would land outside the six doctrine buckets.
 #
-# The rule is an allow-list, not a docs/-only check. A document scattered at the
-# repository root is the failure this plugin exists to prevent, so everything is
-# refused except: a bucket under any docs/ directory, README.md at any level,
-# the root files an ecosystem fixes by name (LICENSE, CHANGELOG, ...), anything
-# inside a dot-directory or a vendored/generated tree, and whatever the repo
-# adds via DOCTRINE_ALLOW.
+# Scope is docs/ and nothing else. Outside it the gate is silent, whatever the
+# extension — source, config, plugin manifests (SKILL.md, agents/*.md), notes
+# next to the code. That the doctrine also asks documents not to scatter across
+# the repository is the directive's business; this gate only owns the one claim
+# a path can settle: inside docs/, this is not one of the six.
+#
+# Inside docs/ every file is governed regardless of extension — _assets/ is the
+# bucket for images and attachments, so a PNG loose under docs/ is a violation
+# like any other. Exceptions: docs/README.md (the doctrine a team writes for
+# itself), a dot-directory or vendored tree that ALREADY exists (doc-site
+# tooling is left alone, but new structure is not invented here), and whatever
+# DOCTRINE_ALLOW lists.
 #
 # This inspects the TOOL INPUT — a path string, before the write happens. It is
 # not a pass over generated content, and it makes no judgment about the
 # document: which bucket a document belongs in is left to the directive, since
-# a path cannot tell you that. The only claim made here is mechanical: this
-# path is not an allowed location.
+# a path cannot tell you that.
 #
 # Fails open. A missing python3, unreadable payload, or unexpected schema lets
 # the write through rather than blocking a session on the gate itself.
 #
 # Kill switch:  export DOCTRINE_OFF=1
-# Escape hatch: export DOCTRINE_ALLOW="content,blog,_posts/drafts"
+# Escape hatch: export DOCTRINE_ALLOW="docs/package.json,docs/site"
 #               comma-separated; each entry matches a whole path segment or a
 #               path prefix relative to the project root.
 
@@ -38,20 +43,11 @@ import posixpath
 import sys
 
 BUCKETS = ("decisions", "handbooks", "reports", "specs", "proposals", "_assets")
-DOC_SUFFIXES = (".md", ".mdx")
-# Names an ecosystem expects at the repository root, by convention or tooling.
-ROOT_FILES = (
-    "README.md", "LICENSE.md", "CHANGELOG.md", "CONTRIBUTING.md",
-    "CODE_OF_CONDUCT.md", "SECURITY.md", "AGENTS.md", "CLAUDE.md",
-)
 # Vendored, generated, or otherwise not-ours trees.
 SKIP_DIRS = (
     "node_modules", "vendor", "dist", "build", "target", "out",
     "venv", ".venv", "site-packages", "coverage",
 )
-# Markdown that is a definition the platform loads by path, not a document:
-# Claude Code skills, subagents, and slash commands; prompt templates.
-MANIFEST_DIRS = ("skills", "agents", "commands", "hooks", "prompts", "templates")
 
 
 def allow():
@@ -93,80 +89,52 @@ if not segments:
 
 directories, name = segments[:-1], segments[-1]
 
-# Dot-directories and vendored trees are none of the doctrine's business — except
-# under docs/, where the exemption exists to avoid fighting doc-site tooling that
-# is already there. Scaffolding a NEW one is the model inventing structure under
-# docs/, so under docs/ the directory has to exist already.
-scaffolding = None
-for i, directory in enumerate(directories):
-    if directory not in SKIP_DIRS and not directory.startswith("."):
-        continue
-    if "docs" not in directories[:i]:
-        allow()
-    branch = posixpath.join(root, *directories[:i + 1])
-    if os.path.isdir(branch):
-        allow()
-    scaffolding = "/".join(directories[:i + 1])
-    break
+if "docs" not in directories:
+    allow()
 
 for extra in (os.environ.get("DOCTRINE_ALLOW") or "").split(","):
     extra = extra.strip().strip("/")
     if extra and (extra in directories or relative == extra or relative.startswith(extra + "/")):
         allow()
 
-# Inside a docs/ tree the doctrine governs every file, whatever its extension:
-# images and attachments belong in _assets/, not loose under docs/. Outside it,
-# only documents are governed — source and config are none of this gate's business.
-in_docs = False
-for i, directory in enumerate(directories):
-    if directory != "docs":
-        continue
-    in_docs = True
-    if i + 1 < len(directories) and directories[i + 1] in BUCKETS:
-        allow()
+# The doctrine file a team writes for itself sits at the top of docs/.
+if directories[-1] == "docs" and name == "README.md":
+    allow()
 
-if in_docs:
-    # The doctrine file a team writes for itself sits at the top of docs/.
-    if directories[-1] == "docs" and name == "README.md":
+scaffolding = None
+for i, directory in enumerate(directories):
+    if directory == "docs" or "docs" not in directories[:i]:
+        continue
+    if directory in BUCKETS:
         allow()
-else:
-    if not name.lower().endswith(DOC_SUFFIXES):
-        allow()
-    # README.md is the one filename that means "this directory, explained".
-    if name == "README.md":
-        allow()
-    if any(d in MANIFEST_DIRS for d in directories):
-        allow()
-    if not directories and name in ROOT_FILES:
-        allow()
+    if directory in SKIP_DIRS or directory.startswith("."):
+        # Tooling already on disk is left alone; a new one is new structure.
+        if os.path.isdir(posixpath.join(root, *directories[:i + 1])):
+            allow()
+        scaffolding = "/".join(directories[:i + 1])
+    break
 
 buckets = ", ".join(b + "/" for b in BUCKETS)
 if scaffolding:
     reason = (
         "`%s` would create `%s`, a new directory under docs/ that is not one of the six "
-        "buckets. Existing doc-site tooling is left alone, but new structure under docs/ "
-        "is not invented here." % (relative, scaffolding)
+        "buckets. Doc-site tooling already on disk is left alone, but new structure under "
+        "docs/ is not invented here." % (relative, scaffolding)
     )
-elif in_docs:
+else:
     reason = (
         "`%s` is under docs/ but not in one of the six buckets. Every file under docs/ "
         "belongs to a bucket — images and attachments go in _assets/." % relative
     )
-else:
-    reason = (
-        "`%s` puts a document outside docs/. Documents do not live next to the code "
-        "or at the repository root." % relative
-    )
 
 print(
     "doctrine: refused — %s\n"
-    "Every document lives in exactly one of: %s — all under docs/.\n"
+    "The buckets are: %s.\n"
     "Classify by lifetime, not topic: undecided -> proposals/; invalidated by a code change -> specs/; "
     "kept current from now on -> handbooks/; why a hard-to-reverse choice was made -> decisions/; "
     "an observation fixed to a point in time -> reports/ (research under reports/research/).\n"
-    "Create the bucket if it does not exist yet, then write there. Allowed outside the buckets: "
-    "README.md at any level, root LICENSE/CHANGELOG/CONTRIBUTING/CODE_OF_CONDUCT/SECURITY/AGENTS/CLAUDE, "
-    "and paths listed in DOCTRINE_ALLOW."
+    "Create the bucket if it does not exist yet, then write there. Only docs/README.md may sit at the "
+    "top of docs/; paths in DOCTRINE_ALLOW are exempt."
     % (reason, buckets),
     file=sys.stderr,
 )
