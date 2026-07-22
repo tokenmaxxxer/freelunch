@@ -83,10 +83,12 @@ which reads it, removes the marker with `git rm`, and continues.
 
 It does not build the bus. dispatch steers an agent already running in a
 git-event environment; the always-on runner that maps a git event to an agent run
-is infrastructure (a webhook receiver, a session spawner), not a plugin — a
-partial one already exists wherever an agent can subscribe to PR activity. And it
-runs no content audit: placement and granularity happen at write time, consistent
-with the stack's no-verification thesis.
+is infrastructure, not a plugin. A reference runner ships in this repo —
+`.github/workflows/dispatch.yml` (the official `anthropics/claude-code-action` in
+automation mode), documented in [`docs/handbooks/dispatch-runner.md`](../docs/handbooks/dispatch-runner.md) —
+and a partial one already exists wherever an agent can subscribe to PR activity.
+And it runs no content audit: placement and granularity happen at write time,
+consistent with the stack's no-verification thesis.
 
 ## Kill switch
 
