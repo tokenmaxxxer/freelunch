@@ -1,6 +1,6 @@
 {
   "name": "doctrine",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Documentation placement doctrine: every repository document lives in one of six lifetime-based buckets under docs/. A UserPromptSubmit directive steers classification at write time; a PreToolUse gate mechanically refuses writes that land under docs/ outside the buckets. Scope is docs/ only — no content audits, no post-hoc doc review.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"

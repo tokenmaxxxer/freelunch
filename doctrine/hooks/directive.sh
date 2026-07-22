@@ -18,9 +18,9 @@ fi
 
 cat <<'EOF'
 <doctrine-directive priority="high">
-This directive governs WHERE repository documentation lives and WHEN it is updated. It adds no review passes and never re-reads a finished document.
+This directive governs `docs/` — how the repository's documentation is organized there, and when it is updated. Documentation belongs in `docs/`: when a turn produces a document, that is where it goes. Nothing outside `docs/` is this directive's business.
 
-SURFACE GATE: apply only when the turn (a) writes or edits a document that belongs to the repository, or (b) changes code in a way that makes an existing document false. If neither applies — code with no doc consequence, conversation, config, throwaway analysis — this directive is inert: skip it entirely.
+SURFACE GATE: apply only when the turn (a) writes or edits a document, or (b) changes code in a way that makes an existing document false. If neither applies — code with no doc consequence, conversation, config, throwaway analysis — this directive is inert: skip it entirely.
 
 REPOSITORY OVERRIDE: if the repository has its own `docs/README.md`, that file is the doctrine and outranks everything below — read it and follow it.
 
@@ -36,7 +36,7 @@ Names are exact. Singular forms (`decision/`, `handbook/`, `report/`, `spec/`, `
 
 Every file under `docs/` belongs to a bucket, whatever its extension — images, diagrams, exports, and attachments go in `_assets/`, never loose under `docs/`. Only `docs/README.md` may sit at the top of `docs/`.
 
-Every new document goes inside one of the six — including documents about code, which do not live next to the code. A note dropped at the repository root or beside a module is the scatter this doctrine exists to prevent, so write it into a bucket instead. This part is a direction, not a mechanical rule: files an ecosystem fixes by name (root `README.md`, `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`), `README.md` explaining a directory, and definitions the platform loads by path (`skills/**/SKILL.md`, `agents/*.md`, `commands/*.md`) are not documents and stay where they belong.
+Write documentation into a bucket rather than beside the code — a document about a module belongs in `docs/`, not next to it. Files that are not documentation are outside this directive entirely: leave them where their ecosystem puts them, and do not move existing ones into `docs/`.
 
 CLASSIFY BY LIFETIME, NOT TOPIC — two documents about the same event split when one will be rewritten from now on and the other is fixed to when it was written. Ask in order, stop at the first yes:
 1. Is adoption still undecided? → `proposals/`
@@ -60,8 +60,8 @@ COMPOSITION: this is a direction — fan-out worker task specs inherit it (worke
 NEVER:
 - a documentation audit, doc-vs-code diff pass, or re-read of a document just written; placement and classification happen at write time.
 - creating any new directory under `docs/` other than the six, including tooling and doc-site scaffolding (`.vitepress/`, `.docusaurus/`) — tooling already present is left alone, but none is introduced here.
-- scattering `SUMMARY.md` / `NOTES.md` / `CHANGES.md` at the repository root instead of using a bucket.
-- deleting or relocating pre-existing documentation to satisfy the layout.
+- writing a `SUMMARY.md` / `NOTES.md` / `CHANGES.md` at the repository root when a bucket is where it belongs.
+- deleting or relocating pre-existing files to satisfy the layout, inside `docs/` or out.
 </doctrine-directive>
 EOF
 exit 0

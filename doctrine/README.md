@@ -24,11 +24,11 @@ Classification is by lifetime, not topic. One incident produces a postmortem in
 
 ## Two layers
 
-**`UserPromptSubmit` directive** — steers the judgment. Which bucket this
-document belongs in, that the six must exist before writing, that a change
-which falsifies a document fixes it in the same turn, and that no document
-restates a fact another one owns. Surface-gated: inert on turns that touch no
-documentation.
+**`UserPromptSubmit` directive** — steers the judgment: documentation goes in
+`docs/`, in the bucket its lifetime picks; the six exist before anything is
+written; a change that falsifies a document fixes it in the same turn; no
+document restates a fact another one owns. Surface-gated: inert on turns that
+touch no documentation, and silent about everything outside `docs/`.
 
 **`PreToolUse` gate** — enforces the one rule that needs no judgment, inside
 `docs/` and nowhere else. A write landing under `docs/` outside the six buckets
@@ -38,11 +38,11 @@ a finished document.
 
 Inside a `docs/` tree every file is governed regardless of extension —
 `_assets/` exists so images and attachments have a bucket, and a PNG loose under
-`docs/` is as much a violation as a stray note. Outside `docs/` the gate is
-silent: source, config, notes beside a module, and definitions the platform
-loads by path (`SKILL.md`, `agents/*.md`, `commands/*.md`) are not its business.
-That documents should not scatter across the repository is still doctrine — it
-is carried by the directive, as direction rather than refusal.
+`docs/` is as much a violation as a stray note. Outside `docs/` neither layer
+legislates: source, config, and definitions the platform loads by path
+(`SKILL.md`, `agents/*.md`, `commands/*.md`) are simply not documentation. An
+earlier version reached across the whole repository and needed an exception for
+each of those; the exception list was the signal that the scope was wrong.
 
 Exceptions inside `docs/`: `docs/README.md`, a dot-directory or vendored tree
 that already exists on disk, and whatever the repository adds:
