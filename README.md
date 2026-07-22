@@ -21,6 +21,18 @@ The headline measurement — the freelunch plugin's on/off ablation, 18 tasks, 7
 
 Geometric mean **1.50× faster at tied quality** (630/632 checks pass in each arm), with the one task that ran slower under fan-out reported rather than trimmed.
 
+## Repository knowledge preservation
+
+The thesis has a corollary the stack now leans on as hard as the first: **if the generation layer is stateless and interchangeable, the knowledge cannot live in the session — it has to live in the repository.** A cheap worker is discarded after its turn; a session ends; an agent that resumes has no memory of the one before it. So the durable record of *what was decided, what was tried, what failed, and what is still open* must be reconstructable from git alone. The test is concrete: **a person or agent with no memory of this project should be able to onboard from the repository without loss** — no tribal knowledge, no "ask whoever wrote it," no state stranded in a chat log.
+
+Three plugins carry this, and it is one idea — the repository as its own memory:
+
+- **[warrant](warrant/)** freezes the *intent* before the code: a proposal states the request, constraints, and write set; a `## What did not work` section and a per-unit hunt record capture what fell over and what was probed; `SessionStart` rebuilds an interrupted unit from disk, and every commit's trailer ties it back to its proposal. A stranger picks up the branch and sees not just what stands but what already failed.
+- **[doctrine](doctrine/)** files durable knowledge by *lifetime*, so the record stays high-signal: decisions fixed at the moment they were made, handbooks kept current, reports fixed to a point in time. Nothing important scatters; nothing goes stale unnoticed.
+- **[dispatch](dispatch/)** makes git the *only* channel, so the trajectory itself is the record: issues carry intent, PR comments carry the feedback that steered each round, decision markers carry what a run was waiting on. A triggered run orients from git alone; its chat-fronted mode mirrors even conversational input into issues and PR comments, so nothing that shaped the work is lost to a session.
+
+The position paper ([*Generation Is All You Need*](docs/reports/generation-is-all-you-need.md)) argues the generation/verification split; these three make the record that survives it, so the human oracle — or a fresh agent standing in for the last one — always resumes from the same durable ground.
+
 ## Install
 
 One line, no clone (works with the standalone CLI or with only the VSCode extension):
