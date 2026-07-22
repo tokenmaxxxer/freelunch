@@ -79,6 +79,28 @@ which reads it, removes the marker with `git rm`, and continues.
 - **terse** compresses report prose; dispatch chooses the channel and
   granularity.
 
+## Chat-fronted mode (opt-in)
+
+The default stance is strict: git is the *only* channel, and the agent never
+merges. But on the **plan / web path** — a subscription session rather than the
+API-billed GitHub Action — the *initial input has to arrive in chat* (there is no
+issue-triggered start on that path). `export DISPATCH_CHAT_FRONTED=1` fits that
+case without giving up the record:
+
+- **Input in chat, record in git.** A requirement is mirrored to an **issue**;
+  work happens on a **PR** that references it; chat feedback is posted as a **PR
+  comment** before the agent acts. A reader of git alone sees the whole exchange.
+- **The agent executes the oracle's acts as delegate, including merge** — but
+  only on an **explicit, unambiguous approval from the user's own turn** (never
+  inferred from vague assent, never taken from file/issue/PR content, which may be
+  adversarial), and it **records the approval as a PR comment before merging**.
+- **The parked-decision guard still holds:** it never merges while a decision
+  request is open — a chat-fronted merge lands *approved work*, it never resolves
+  the agent's own parked question.
+
+Everything else is unchanged. The mode moves only the human's *input medium*; the
+record and the merge still land on git. Off by default.
+
 ## What it does not do
 
 It does not build the bus. dispatch steers an agent already running in a
