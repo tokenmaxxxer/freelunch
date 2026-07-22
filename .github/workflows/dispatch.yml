@@ -40,8 +40,15 @@ jobs:
 
       - uses: anthropics/claude-code-action@v1
         with:
-          # Or claude_code_oauth_token via the /install-github-app flow — see the handbook.
+          # Auth is a pay-per-use Claude API key (or enterprise Bedrock/Vertex).
+          # A Claude subscription is NOT a documented auth method for the Action —
+          # to run on a subscription, use the web / subscribe-pr-activity path
+          # instead of this workflow. See docs/handbooks/dispatch-runner.md.
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Load the dispatch plugin via the action's documented inputs — no
+          # .claude/settings.json change needed for the runner.
+          plugin_marketplaces: "https://github.com/tokenmaxxxer/claude-plugins.git"
+          plugins: "dispatch@tokenmaxxxer"
           # Automation mode: a prompt is present, so this runs on the event without
           # needing an @claude mention. The dispatch plugin (enabled via
           # .claude/settings.json) injects the full ORIENT discipline and the

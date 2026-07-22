@@ -35,24 +35,29 @@ unit runs one at a time and a parked decision is never half-applied.
 
 ## Setup
 
-1. **Auth secret.** Add one repository secret the action reads:
-   - `ANTHROPIC_API_KEY`, or
-   - `CLAUDE_CODE_OAUTH_TOKEN` via the `/install-github-app` flow (swap the
-     `anthropic_api_key:` input for `claude_code_oauth_token:`).
-2. **Enable the plugin in the runner** by adding this to `.claude/settings.json`
-   (committed to the repo — the README's team-rollout; it also enables the stack
-   for anyone who opens the repo). This file is protected, so add it by hand or
-   with `/update-config`:
-   ```json
-   {
-     "extraKnownMarketplaces": {
-       "tokenmaxxxer": { "source": { "source": "github", "repo": "tokenmaxxxer/claude-plugins" } }
-     },
-     "enabledPlugins": { "tokenmaxxxer-env@tokenmaxxxer": true }
-   }
+1. **Auth secret.** The action authenticates to Anthropic with a **pay-per-use
+   Claude API key** — add `ANTHROPIC_API_KEY` (from console.anthropic.com) as a
+   repository secret. Enterprise setups can use Amazon Bedrock / Google Vertex /
+   Microsoft Foundry instead (`use_bedrock` / `use_vertex`). Per the official docs,
+   the action's documented auth inputs are `anthropic_api_key` (+ `github_token`,
+   `use_bedrock`, `use_vertex`) — a **Claude subscription (Pro/Max) is NOT a
+   documented/supported auth method for the GitHub Action**. `claude setup-token`
+   exists but is for local CLI automation, not this action. To run on a
+   subscription instead of API billing, use Claude Code on the web
+   (`subscribe_pr_activity` / auto-fix) rather than this workflow — at the cost of
+   losing autonomous issue-triggered starts.
+2. **The plugin is loaded by the workflow**, via the action's documented inputs
+   (already wired in `dispatch.yml`) — no settings change is needed for the
+   runner:
+   ```yaml
+   plugin_marketplaces: "https://github.com/tokenmaxxxer/claude-plugins.git"
+   plugins: "dispatch@tokenmaxxxer"
    ```
-   The `tokenmaxxxer-env` bundle now lists `dispatch` as a dependency, so this
-   enables dispatch (with its composition partners) in every triggered run.
+   To also enable dispatch's composition partners, add them to `plugins`
+   (e.g. `warrant@tokenmaxxxer`, `doctrine@tokenmaxxxer`). Separately, to enable
+   the stack for humans who *open* the repo (not the runner), commit
+   `extraKnownMarketplaces` + `enabledPlugins` to `.claude/settings.json` — a
+   protected file, so add it by hand or with `/update-config`.
 
 ## Security notes
 
@@ -71,8 +76,10 @@ unit runs one at a time and a parked decision is never half-applied.
 
 - `pull_request_review` and label-triggered events are **not** in the `on:` list;
   add and test them if you need label-driven flows.
-- Whether `claude-code-action` auto-installs the `enabledPlugins` from
-  `.claude/settings.json` in the runner is version-dependent — verify against your
-  action version. The self-contained `prompt` is the fallback if it does not.
+- Plugin loading uses the action's documented `plugin_marketplaces` + `plugins`
+  inputs (v1). The self-contained `prompt` remains the fallback if a plugin fails
+  to install, so the run still follows the git-only / ORIENT discipline.
+- Authentication is a pay-per-use Claude API key (or Bedrock/Vertex/Foundry); a
+  Claude subscription is not a documented auth method for the action (see Setup).
 - This is a reference, not a hardened deployment: no rate limiting, no
   per-label routing, single prompt for all events.
