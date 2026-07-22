@@ -51,7 +51,7 @@ if [ -n "$CLI" ] && [ -x "$CLI" ]; then
   # A failed install is recorded rather than shrugged off: the closing "installed
   # the full stack" line used to print no matter what happened above it.
   install_failed=""
-  for plugin in freelunch terse blueprint no-mock scout no-footgun doctrine warrant; do
+  for plugin in freelunch terse blueprint no-mock scout no-footgun doctrine warrant dispatch; do
     "$CLI" plugin install "$plugin@$MARKET" --scope user || install_failed="$install_failed $plugin"
   done
   "$CLI" plugin install "$BUNDLE@$MARKET" --scope user || install_failed="$install_failed $BUNDLE"
@@ -60,7 +60,7 @@ if [ -n "$CLI" ] && [ -x "$CLI" ]; then
   # what actually pulls a newer version (e.g. freelunch 0.2.10 -> 0.2.11).
   # Updating the bundle alone would not move its unpinned dependencies, so update
   # each plugin explicitly, same list as the install loop.
-  for plugin in freelunch terse blueprint no-mock scout no-footgun doctrine warrant; do
+  for plugin in freelunch terse blueprint no-mock scout no-footgun doctrine warrant dispatch; do
     "$CLI" plugin update "$plugin@$MARKET" || true
   done
   "$CLI" plugin update "$BUNDLE@$MARKET" || true
