@@ -30,7 +30,7 @@
 # units only, ignoring per-unit output volume. Width is now counted AFTER
 # identifying a freezable contract — only non-freezable coupling (shared
 # mutable state, sequential dependency, interface still being co-designed)
-# merges units — and the threshold is width >= 3 AND ~100+ expected lines per
+# merges units — and the threshold is width >= 2 AND ~100+ expected lines per
 # unit. Routing A/B probe (12 ground-truth-labeled tasks x old/new directive,
 # 24 router agents, decision-only): old misrouted 4/6 should-fan tasks to solo
 # (including the real 5-document spec-suite case that motivated the fix, which
@@ -133,6 +133,15 @@
 # list) because inter-directive conflicts otherwise resolve silently.
 # Rationale-only; not benchmarked.
 #
+# v2.10 (2026-07-22): drops the threshold's count arm from width >= 3 to
+# width >= 2. The 3-count arm was calibrated back when LEAN SOLO meant INLINE
+# execution, so a width-3 misroute to solo cost a synchronous inline pass. Since
+# v2.6/v2.8 made solo mean one delegated worker, the solo-vs-fan-out switch at
+# width 2 now only costs one extra background spawn plus mechanical
+# integration, against a roughly 2x wall-clock gain from parallelizing two
+# units instead of serializing them. The ~100+ lines size arm is unchanged and
+# still collapses small units into a single worker regardless of count.
+#
 # To disable: export FREELUNCH_OFF=1
 
 if [ -n "$FREELUNCH_OFF" ]; then
@@ -147,7 +156,7 @@ STEP 1 — CONTRACT SPLIT, THEN WIDTH: before any other action, WRITE one short 
 
 RESEARCH TASKS: width = independent search angles needing sustained digging, not the report. One-or-two-query angles count zero (SCALE GATE).
 
-THRESHOLD RULE (mechanical): width >= 3 AND ~100+ expected lines (or comparable effort) per unit → LEAN FAN-OUT; otherwise LEAN SOLO. Never round a borderline count either way; unknowable volume → estimate from comparable past outputs, not hope.
+THRESHOLD RULE (mechanical): width >= 2 AND ~100+ expected lines (or comparable effort) per unit → LEAN FAN-OUT; otherwise LEAN SOLO. Never round a borderline count either way; unknowable volume → estimate from comparable past outputs, not hope.
 
 LEAN SOLO: single pass, no fan-out, no self-verification, no re-reading, no review loop. Executor test, mechanical: does finishing this turn need ANY repo or environment tool call (read, grep, edit, write, shell, test run, fetch)?
 - YES → DELEGATED, always. One unit counts; a one-line edit counts. Dispatch ONE background worker owning the whole unit as subagent_type freelunch-worker (Sonnet-pinned), never run_in_background: false. The conversation session makes no repo tool calls of its own — it stays orchestrator-only, interruptible for new input, compaction-resistant, and never accumulates the worker's reads, tool output, or intermediate reasoning. Worker prompt = owned paths + requirements + any frozen contract; the worker skips verification and delivers raw. File output lands on disk: the parent points to it, never re-echoes it; a text result relays through the parent once. No second worker, no re-run, no verification pass on what returns.
