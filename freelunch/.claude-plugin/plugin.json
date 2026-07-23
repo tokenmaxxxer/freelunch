@@ -1,6 +1,6 @@
 {
   "name": "freelunch",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "description": "Width-conditional: freezes the shared contract, counts independent deliverable units (down to symbol level), then runs a lean solo pass (width <= 2 or tiny units) or a lean fan-out of concurrent background Sonnet agents (width >= 2 and ~100+ lines/unit) with zero idle time and no verification passes.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"
