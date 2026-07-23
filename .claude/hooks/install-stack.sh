@@ -23,7 +23,6 @@ command -v claude >/dev/null 2>&1 || exit 0
 MARKET="tokenmaxxxer"
 BUNDLE="tokenmaxxxer-env"
 GITHUB_REPO="tokenmaxxxer/claude-plugins"
-PLUGINS="freelunch terse blueprint no-mock scout no-footgun doctrine warrant dispatch"
 
 # Fast path: bundle already installed in this container -> exit silently.
 INSTALLED="${HOME}/.claude/plugins/installed_plugins.json"
@@ -37,11 +36,12 @@ if ! claude plugin marketplace list 2>/dev/null | grep -q "$MARKET"; then
 fi
 claude plugin marketplace update "$MARKET" >/dev/null 2>&1 || true
 
-# Install each stack plugin explicitly, then the bundle. Explicit installs are
-# idempotent and converge even when a new plugin was added to the bundle later.
-for p in $PLUGINS; do
-  claude plugin install "${p}@${MARKET}" --scope user >/dev/null 2>&1 || true
-done
+# Install the one-install bundle only. This is always a fresh container, so its
+# dependencies pull in the whole stack (verified: a bundle-only install lands
+# all 10 plugins). Installing the bundle alone is enough and stays consistent
+# with the single tokenmaxxxer-env entry in enabledPlugins. (install.sh --user
+# installs each plugin explicitly for a different reason — upgrading an
+# already-installed bundle on a persistent machine — which does not apply here.)
 claude plugin install "${BUNDLE}@${MARKET}" --scope user >/dev/null 2>&1 || true
 
 # Keep stdout clean: SessionStart hook output is injected into the session.
