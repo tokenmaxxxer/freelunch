@@ -1,5 +1,5 @@
 {
-  "name": "tokenmaxxxer-env",
+  "name": "coding-agent-env",
   "version": "0.6.1",
   "description": "One-install tokenmaxxxer environment: pulls in the whole steering stack (freelunch, terse, blueprint, no-mock, scout, no-footgun, doctrine, warrant, dispatch) as dependencies. Contains no code of its own.",
   "author": {

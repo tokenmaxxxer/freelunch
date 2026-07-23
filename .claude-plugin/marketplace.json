@@ -50,8 +50,8 @@
       "description": "Chat-to-git record-keeping discipline: when you work through chat, the conversation becomes the durable git record — a requirement becomes an issue, the work a pull request that Closes it, feedback becomes PR comments — and a PR merges only on an explicit, recorded user approval. Direction only, no gates, so a person or agent with no memory of the session can reconstruct intent, work, and rationale from git alone."
     },
     {
-      "name": "tokenmaxxxer-env",
-      "source": "./tokenmaxxxer-env",
+      "name": "coding-agent-env",
+      "source": "./coding-agent-env",
       "description": "One-install environment bundle: installs the whole tokenmaxxxer steering stack via dependencies."
     }
   ]

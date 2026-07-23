@@ -39,7 +39,7 @@ The position paper ([*Generation Is All You Need*](docs/reports/generation-is-al
 curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/coding-agent-rulebook/main/install.sh | bash
 ```
 
-This registers the `tokenmaxxxer` marketplace and installs the whole stack — the `tokenmaxxxer-env` bundle plus every plugin it depends on — at **user scope**. It applies to your account on every machine-local session; it does not travel with a repo and does not reach Claude Code on the web or Slack cloud sessions. install.sh writes nothing to the repo it's run from: no `.claude/settings.json` at a repo root, and no SessionStart hook.
+This registers the `tokenmaxxxer` marketplace and installs the whole stack — the `coding-agent-env` bundle plus every plugin it depends on — at **user scope**. It applies to your account on every machine-local session; it does not travel with a repo and does not reach Claude Code on the web or Slack cloud sessions. install.sh writes nothing to the repo it's run from: no `.claude/settings.json` at a repo root, and no SessionStart hook.
 
 The script prefers a real `claude` CLI (standalone, or the binary bundled inside the VSCode extension) if it finds one, and runs `plugin install <name>@tokenmaxxxer --scope user` for each plugin plus the bundle, then updates each to the marketplace's latest. If no `claude` binary is found — or `TOKENMAXXXER_SETTINGS_ONLY=1` is set to force it — the script falls back to writing `~/.claude/settings.json` directly: it merges in the marketplace declaration and enables the bundle, preserving any existing keys and writing a `.bak` before touching an existing file. Either path installs the same bundle the same way.
 
@@ -49,7 +49,7 @@ Or, from any Claude Code session, the equivalent by hand:
 
 ```
 /plugin marketplace add tokenmaxxxer/coding-agent-rulebook
-/plugin install tokenmaxxxer-env@tokenmaxxxer
+/plugin install coding-agent-env@tokenmaxxxer
 ```
 
 One interactive step remains after either path: open `/plugin` → marketplaces → tokenmaxxxer and enable **auto-update**, so future stack additions arrive automatically (there is no CLI switch for this toggle). Verify with `/plugins`. Individual plugins install the same way: `/plugin install terse@tokenmaxxxer`. If an update ever complains about a missing dependency, re-run install.sh — it is idempotent and installs the full stack explicitly.
@@ -67,11 +67,11 @@ One interactive step remains after either path: open `/plugin` → marketplaces 
 | [doctrine](doctrine/) 📁 | Documentation placement: every document lives in one of six lifetime-based buckets under `docs/` (`decisions/`, `handbooks/`, `reports/`, `specs/`, `proposals/`, `_assets/`). A directive classifies at write time; a `PreToolUse` gate refuses writes that land under `docs/` outside them. Unbenchmarked as of v0.1.0. |
 | [warrant](warrant/) 🔒 | Work-unit protocol: a proposal states the request, constraints, and the write set before any code is written; approval freezes that set and the build then runs uninterrupted. A `PreToolUse` gate refuses edits outside the set and commits without the `Proposal:` trailer; `SessionStart` rebuilds state from the repository so an interrupted unit survives the session. At each transition one bounded background hunter probes for silent failures and composition errors on a single stance, returning a reproduced finding or nothing; the proposal and a per-unit hunt record keep what failed and what was probed, so a stranger can resume the work. Unbenchmarked as of v0.4.0. |
 | [dispatch](dispatch/) 📡 | Chat-to-git record-keeping: when you work through chat, the conversation becomes a durable git record — a requirement becomes an issue, the work a PR that `Closes` it, feedback becomes PR comments — and a PR merges only on an explicit, recorded user approval. Direction only (one `UserPromptSubmit` directive, no gates), so a person or agent with no memory of the session can reconstruct intent, work, and rationale from git alone. Unbenchmarked as of v0.5.0. |
-| [tokenmaxxxer-env](tokenmaxxxer-env/) | One-install bundle: pulls the whole stack in as dependencies. |
+| [coding-agent-env](coding-agent-env/) | One-install bundle: pulls the whole stack in as dependencies. |
 
 ## Writing the settings by hand
 
-If you'd rather not run the installer, the minimum to declare by hand is the marketplace plus the `tokenmaxxxer-env` bundle — its dependencies resolve on the next CLI install. This is also exactly what install.sh's CLI-less fallback writes:
+If you'd rather not run the installer, the minimum to declare by hand is the marketplace plus the `coding-agent-env` bundle — its dependencies resolve on the next CLI install. This is also exactly what install.sh's CLI-less fallback writes:
 
 ```json
 {
@@ -81,7 +81,7 @@ If you'd rather not run the installer, the minimum to declare by hand is the mar
     }
   },
   "enabledPlugins": {
-    "tokenmaxxxer-env@tokenmaxxxer": true
+    "coding-agent-env@tokenmaxxxer": true
   }
 }
 ```
@@ -94,5 +94,5 @@ Prefer a subset? Enable individual plugins instead (`"terse@tokenmaxxxer": true`
 
 - `install.sh` — the one-shot installer described above.
 - `.claude-plugin/marketplace.json` — the marketplace manifest.
-- `freelunch/`, `terse/`, `blueprint/`, `no-mock/`, `scout/`, `no-footgun/`, `doctrine/`, `warrant/`, `dispatch/`, `tokenmaxxxer-env/` — one directory per plugin, each with its own README and benchmark notes.
+- `freelunch/`, `terse/`, `blueprint/`, `no-mock/`, `scout/`, `no-footgun/`, `doctrine/`, `warrant/`, `dispatch/`, `coding-agent-env/` — one directory per plugin, each with its own README and benchmark notes.
 - `docs/` — follows the doctrine this repo ships: documents live in lifetime buckets (`reports/` here), attachments in `_assets/`.
