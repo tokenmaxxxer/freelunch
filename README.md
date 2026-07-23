@@ -67,7 +67,16 @@ Either way you get the `tokenmaxxxer-env` bundle, whose dependencies pull in the
 
 ## Team rollout
 
-Commit this to your project's `.claude/settings.json` and everyone who opens the repo gets the stack installed and enabled after a one-time trust prompt. Plugins added to the bundle later reach the team through its version bumps, with no settings change:
+The one-liner above installs at **user scope** — your account, your machine. That does **not** reach Claude Code on the web or Slack cloud sessions: those read plugins from the repository, not your account. To carry the stack with a project, put the declaration in that repo's `.claude/settings.json` (**project scope**) and commit it. Everyone who opens the repo — including cloud/Slack sessions — then gets the stack installed and enabled on session start, after a one-time trust prompt. Plugins added to the bundle later reach the team through its version bumps, with no settings change.
+
+Run the installer from inside the project with `--project`, which merges the two keys into `./.claude/settings.json` for you (existing settings preserved, backup written):
+
+```
+curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/claude-plugins/main/install.sh | bash -s -- --project
+git add .claude/settings.json && git commit -m "Add tokenmaxxxer plugin stack"
+```
+
+Or write the same block by hand:
 
 ```json
 {
