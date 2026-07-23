@@ -168,6 +168,14 @@ if [ -f "$INSTALLED" ] && grep -q "\"${BUNDLE}@${MARKET}\"" "$INSTALLED" 2>/dev/
   exit 0
 fi
 
+# Run the CLI from a scratch directory, never the repo. `claude plugin` resolves
+# its write scope from the current directory (cwd, not CLAUDE_PROJECT_DIR --
+# verified), so running inside the repo makes it pin the marketplace's resolved
+# dependency (freelunch) into the tracked project .claude/settings.json. That
+# dirties the repo on every session and trips stop hooks. A neutral cwd keeps
+# every write at user scope, leaving the checkout clean.
+cd "$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}")" 2>/dev/null || cd / || true
+
 # Register the marketplace (idempotent) and refresh it once.
 if ! claude plugin marketplace list 2>/dev/null | grep -q "$MARKET"; then
   claude plugin marketplace add "$GITHUB_REPO" >/dev/null 2>&1 || true
