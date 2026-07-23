@@ -35,29 +35,24 @@ The position paper ([*Generation Is All You Need*](docs/reports/generation-is-al
 
 ## Install
 
-Run this **inside the repo** you want the stack in (works with the standalone CLI or with only the VSCode extension). By default the installer writes `.claude/settings.json` at the repo root — **project scope** — so committing that one file carries the stack to every session on that repo: local CLI, Claude Code on the web, and Slack cloud sessions alike.
-
 ```
 curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/claude-plugins/main/install.sh | bash
-git add .claude/settings.json && git commit -m "Add tokenmaxxxer plugin stack"
 ```
 
-Everyone who opens the repo then gets the `tokenmaxxxer-env` bundle — whose dependencies pull in the whole stack — installed and enabled on session start, after a one-time trust prompt. (The installer refuses to run outside a git repository, so it never scatters a stray settings file.)
+This registers the `tokenmaxxxer` marketplace and installs the whole stack — the `tokenmaxxxer-env` bundle plus every plugin it depends on — at **user scope**. It applies to your account on every machine-local session; it does not travel with a repo and does not reach Claude Code on the web or Slack cloud sessions. install.sh writes nothing to the repo it's run from: no `.claude/settings.json` at a repo root, and no SessionStart hook.
 
-Want it on your **account** for every project on this machine instead? That is **user scope** — it applies to local sessions everywhere but does not travel with a repo and does not reach cloud/Slack sessions:
+The script prefers a real `claude` CLI (standalone, or the binary bundled inside the VSCode extension) if it finds one, and runs `plugin install <name>@tokenmaxxxer --scope user` for each plugin plus the bundle, then updates each to the marketplace's latest. If no `claude` binary is found — or `TOKENMAXXXER_SETTINGS_ONLY=1` is set to force it — the script falls back to writing `~/.claude/settings.json` directly: it merges in the marketplace declaration and enables the bundle, preserving any existing keys and writing a `.bak` before touching an existing file. Either path installs the same bundle the same way.
 
-```
-curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/claude-plugins/main/install.sh | bash -s -- --user
-```
+`install.sh --help` prints usage. The only other input it reads is the `TOKENMAXXXER_SETTINGS_ONLY=1` environment variable described above.
 
-Or, for user scope, from any Claude Code session:
+Or, from any Claude Code session, the equivalent by hand:
 
 ```
 /plugin marketplace add tokenmaxxxer/claude-plugins
 /plugin install tokenmaxxxer-env@tokenmaxxxer
 ```
 
-Either user-scope path gets you the bundle the same way. One interactive step remains there: open `/plugin` → marketplaces → tokenmaxxxer and enable **auto-update**, so future stack additions arrive automatically (there is no CLI switch for this toggle). Individual plugins install the same way: `/plugin install terse@tokenmaxxxer`. If an update ever complains about a missing dependency, re-run the install one-liner — it is idempotent and installs the full stack explicitly.
+One interactive step remains after either path: open `/plugin` → marketplaces → tokenmaxxxer and enable **auto-update**, so future stack additions arrive automatically (there is no CLI switch for this toggle). Verify with `/plugins`. Individual plugins install the same way: `/plugin install terse@tokenmaxxxer`. If an update ever complains about a missing dependency, re-run install.sh — it is idempotent and installs the full stack explicitly.
 
 ## Plugins
 
@@ -74,11 +69,9 @@ Either user-scope path gets you the bundle the same way. One interactive step re
 | [dispatch](dispatch/) 📡 | Chat-to-git record-keeping: when you work through chat, the conversation becomes a durable git record — a requirement becomes an issue, the work a PR that `Closes` it, feedback becomes PR comments — and a PR merges only on an explicit, recorded user approval. Direction only (one `UserPromptSubmit` directive, no gates), so a person or agent with no memory of the session can reconstruct intent, work, and rationale from git alone. Unbenchmarked as of v0.5.0. |
 | [tokenmaxxxer-env](tokenmaxxxer-env/) | One-install bundle: pulls the whole stack in as dependencies. |
 
-## Team rollout
+## Writing the settings by hand
 
-The default project-scope install above is the team rollout: commit the `.claude/settings.json` it writes and everyone who opens the repo — local CLI and cloud/Slack sessions alike — gets the stack installed and enabled on session start, after a one-time trust prompt. Plugins added to the bundle later reach the team through its version bumps, with no settings change. The installer merges into any existing `.claude/settings.json` (existing keys preserved, a `.bak` written), so it is safe to run on a repo that already has one.
-
-Prefer to write the declaration by hand? It is exactly these two keys:
+Whether the CLI installs each plugin or install.sh falls back to editing `~/.claude/settings.json` directly, the declaration it converges on is exactly these two keys:
 
 ```json
 {
