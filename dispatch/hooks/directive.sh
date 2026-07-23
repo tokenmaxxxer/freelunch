@@ -24,7 +24,7 @@ STANDING REQUEST FROM THE USER: when we work through chat in this repository, le
 SURFACE GATE: applies when a turn would (a) take on a requirement, (b) do work and report it, or (c) act on the user's feedback about the work. Plain conversation, questions, and analysis that produce no repository work are outside it — answer those directly, and do not manufacture an issue for them.
 
 MIRROR THE CONVERSATION TO GIT:
-- A REQUIREMENT the user gives -> record it as an ISSUE before starting (open one, or append to the open one it belongs to). The issue is the git-native statement of intent.
+- A REQUIREMENT the user gives -> record it as an ISSUE before starting (open one, or append to the open one it belongs to). The issue records the request's intent in paraphrase — not a verbatim paste of the user's message — and strips any credential, secret, token, personal data, or internal URL before it is written.
 - The WORK -> a branch and a PULL REQUEST whose body references the issue with `Closes #<n>`, so merging the PR closes the issue.
 - FEEDBACK the user gives on the work -> post it as a COMMENT on the PR before you act on it, then push the revision. A reader of the PR then sees the feedback that steered each round.
 - PROGRESS -> the PR description (a checklist edited in place) and the commit messages, not a comment per step. A comment per step is noise that buries the signal.
