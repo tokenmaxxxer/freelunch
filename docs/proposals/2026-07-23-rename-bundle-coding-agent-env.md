@@ -1,5 +1,5 @@
 ---
-status: approved
+status: landed
 files:
   - tokenmaxxxer-env/.claude-plugin/plugin.json
   - .claude-plugin/marketplace.json
