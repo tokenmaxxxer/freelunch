@@ -3,6 +3,8 @@ status: proposed        # proposed -> approved -> landed
 issue: 18
 files:
   - install.sh
+  - .claude/hooks/install-stack.sh   # deleted
+  - .claude/settings.json            # deleted
 ---
 
 # Proposal: `install.sh` — keep only the user-scope install
@@ -27,6 +29,13 @@ Settled in the conversation that produced this proposal; decisions, not open que
 3. The existing CLI-less fallback (write `~/.claude/settings.json` directly when
    no `claude` binary is found) is user-scope too and stays.
 4. Behaviour of the kept path is unchanged; this is a subtraction, not a redesign.
+5. With `--project` gone, this repo's own dogfood of it is orphaned and is
+   removed too: `.claude/hooks/install-stack.sh` and the whole
+   `.claude/settings.json`. Deleting the settings file also drops its declarative
+   `extraKnownMarketplaces` + `enabledPlugins` block — the doc-correct auto-install
+   path — so the repo will no longer auto-declare the stack to a session at all.
+   That is the intended end-state here (plugins are installed per user via
+   `install.sh` or a cloud setup script), accepted as a deliberate tradeoff.
 
 ## What will be done
 
@@ -41,16 +50,17 @@ Reduce `install.sh` to a single user-scope path:
 - Keep `find_cli()`, the marketplace add/update, the explicit per-plugin install
   loop plus the bundle, and the `write_settings` fallback to
   `~/.claude/settings.json` when no CLI is present.
+- Delete `.claude/hooks/install-stack.sh` (the generated SessionStart bootstrap,
+  now orphaned) and `.claude/settings.json` (its hook registration and the
+  declarative marketplace/enabledPlugins block) — the repo carries no auto-install
+  machinery afterward.
 
 ## Out of scope (separate follow-ups)
 
 - README `--project` references (2 spots). `README.md` is also in the frozen
   write set of the still-open `2026-07-22-dispatch` unit, so it is not touched
   here; the stale references become the next proposal.
-- The repo's own dogfood `.claude/settings.json` SessionStart-hook registration
-  and `.claude/hooks/install-stack.sh` — orphaned once `--project` is gone, but
-  removing them is a distinct decision (stop dogfooding the hook), taken next.
-- No change to any plugin, or to what gets installed.
+- No change to any plugin, or to what gets installed by the kept user-scope path.
 
 ## How we will know it worked
 
@@ -59,6 +69,7 @@ Reduce `install.sh` to a single user-scope path:
 - No `--project`, `write_bootstrap_hook`, or hook heredoc remains (`grep -n
   project install.sh` returns nothing meaningful).
 - `bash -n install.sh` is clean.
+- `.claude/hooks/install-stack.sh` and `.claude/settings.json` no longer exist.
 
 ## What did not work
 
