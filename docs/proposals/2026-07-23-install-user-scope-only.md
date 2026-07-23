@@ -1,5 +1,5 @@
 ---
-status: proposed        # proposed -> approved -> landed
+status: approved        # proposed -> approved -> landed
 issue: 18
 files:
   - install.sh
