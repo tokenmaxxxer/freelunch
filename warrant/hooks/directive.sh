@@ -34,7 +34,7 @@ files:                  # the write set; nothing outside it gets edited
   - path/two.py
 ---
 ```
-and a body of five short sections: the request quoted verbatim; the constraints stated so far that change what gets built; what will be done; what is deliberately out of scope; how you will know it worked. Keep it to what a reader needs — a typo fix is six lines, a subsystem is a page.
+and a body of five short sections: the request's intent in one or two paraphrased sentences — first strip any credential, secret, token, personal data, or internal URL; then quote a short phrase only where exact NON-SENSITIVE wording changes what gets built (never quote the stripped material even if it is the load-bearing wording); the constraints stated so far that change what gets built; what will be done; what is deliberately out of scope; how you will know it worked. Keep it to what a reader needs — a typo fix is six lines, a subsystem is a page.
 
 THE WRITE SET ANTICIPATES WHAT THE WORK WILL NEED. List every path the change will touch, not just the obvious one: the test file that covers it, `.env.example` when a new variable appears, the dependency manifest when something is added, the migration, the fixture. These are the parts I most want to see before approving — a new dependency or a new environment variable is a decision, and it belongs in the proposal rather than arriving unannounced during the build. Documents under `docs/` are the exception: those are the record the work produces, and they are always writable.
 
