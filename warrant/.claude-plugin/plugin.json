@@ -1,6 +1,6 @@
 {
   "name": "warrant",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Work-unit protocol: one approval gate at the front, then uninterrupted execution. A proposal states the request, the constraints, and the write set; approval freezes that set; a PreToolUse gate refuses edits outside it and commits without the Proposal: trailer; SessionStart rebuilds the state from disk so an interrupted unit survives the session.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"

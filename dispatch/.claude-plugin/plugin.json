@@ -1,6 +1,6 @@
 {
   "name": "dispatch",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Chat-to-git record-keeping discipline: when you work through chat, the conversation becomes the durable git record — a requirement becomes an issue, the work a pull request that Closes it, feedback becomes PR comments — and a PR merges only on an explicit, recorded user approval. Direction only, no gates: so a person or agent with no memory of the session can reconstruct intent, work, and rationale from git alone. Composes with warrant, doctrine, and terse.",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"
