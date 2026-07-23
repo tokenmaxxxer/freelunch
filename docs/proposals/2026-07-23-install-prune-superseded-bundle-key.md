@@ -1,5 +1,5 @@
 ---
-status: approved
+status: landed
 files:
   - install.sh
   - coding-agent-env/.claude-plugin/plugin.json
