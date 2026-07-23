@@ -1,4 +1,4 @@
-# tokenmaxxxer / claude-plugins
+# tokenmaxxxer / coding-agent-rulebook
 
 A Claude Code plugin marketplace by Jung Jiwon & Lee Jongkwan: a steering stack that makes coding agents faster and cheaper **without lowering the deliverable bar**. Every plugin ships with the benchmark numbers that justify its rules — policies that lose their ablation get removed, not shipped.
 
@@ -36,7 +36,7 @@ The position paper ([*Generation Is All You Need*](docs/reports/generation-is-al
 ## Install
 
 ```
-curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/claude-plugins/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tokenmaxxxer/coding-agent-rulebook/main/install.sh | bash
 ```
 
 This registers the `tokenmaxxxer` marketplace and installs the whole stack — the `tokenmaxxxer-env` bundle plus every plugin it depends on — at **user scope**. It applies to your account on every machine-local session; it does not travel with a repo and does not reach Claude Code on the web or Slack cloud sessions. install.sh writes nothing to the repo it's run from: no `.claude/settings.json` at a repo root, and no SessionStart hook.
@@ -48,7 +48,7 @@ The script prefers a real `claude` CLI (standalone, or the binary bundled inside
 Or, from any Claude Code session, the equivalent by hand:
 
 ```
-/plugin marketplace add tokenmaxxxer/claude-plugins
+/plugin marketplace add tokenmaxxxer/coding-agent-rulebook
 /plugin install tokenmaxxxer-env@tokenmaxxxer
 ```
 
@@ -77,7 +77,7 @@ If you'd rather not run the installer, the minimum to declare by hand is the mar
 {
   "extraKnownMarketplaces": {
     "tokenmaxxxer": {
-      "source": { "source": "github", "repo": "tokenmaxxxer/claude-plugins" }
+      "source": { "source": "github", "repo": "tokenmaxxxer/coding-agent-rulebook" }
     }
   },
   "enabledPlugins": {

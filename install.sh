@@ -11,7 +11,7 @@ set -u
 
 MARKET="tokenmaxxxer"
 BUNDLE="tokenmaxxxer-env"
-GITHUB_REPO="tokenmaxxxer/claude-plugins"
+GITHUB_REPO="tokenmaxxxer/coding-agent-rulebook"
 
 usage() {
   cat <<'USAGE'

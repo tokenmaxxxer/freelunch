@@ -77,17 +77,17 @@ Removed from v1 as refuted by the benchmark: the minimum-3-agents mandate, uncon
 **With the `claude` CLI** — no clone needed, inside any CLI session:
 
 ```
-/plugin marketplace add tokenmaxxxer/claude-plugins
+/plugin marketplace add tokenmaxxxer/coding-agent-rulebook
 /plugin install freelunch@tokenmaxxxer
 ```
 
-(or from a shell: `claude plugin marketplace add tokenmaxxxer/claude-plugins && claude plugin install freelunch@tokenmaxxxer`)
+(or from a shell: `claude plugin marketplace add tokenmaxxxer/coding-agent-rulebook && claude plugin install freelunch@tokenmaxxxer`)
 
 **VSCode extension only** — the extension's chat does not support `/plugin` commands, so use the installer, which finds the CLI bundled inside the extension and runs the real install through it:
 
 ```
-git clone https://github.com/tokenmaxxxer/claude-plugins.git
-cd claude-plugins && ./install.sh   # repo-root installer: installs the whole stack via the tokenmaxxxer-env bundle
+git clone https://github.com/tokenmaxxxer/coding-agent-rulebook.git
+cd coding-agent-rulebook && ./install.sh   # repo-root installer: installs the whole stack via the tokenmaxxxer-env bundle
 ```
 
 Then reload the VSCode window. The installer prefers a PATH `claude`, then the extension's bundled CLI, and as a last resort writes `~/.claude/settings.json` directly (backing up the original). Idempotent — safe to re-run.
