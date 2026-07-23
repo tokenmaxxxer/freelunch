@@ -125,6 +125,99 @@ print(f"    updated {path}")
 PY
 }
 
+# Write the SessionStart bootstrap hook next to a project settings.json and
+# register it. The declarative enabledPlugins above installs the stack on a
+# local CLI session (after a one-time interactive trust prompt), but a remote
+# Claude Code on the web session runs non-interactively with nobody to accept
+# that prompt, so the stack silently never installs there. This hook runs an
+# explicit `claude plugin install` — which does not need the passive trust gate
+# — in remote sessions, idempotently. $1 is the repo root.
+write_bootstrap_hook() {
+  local root="$1"
+  mkdir -p "$root/.claude/hooks"
+  cat > "$root/.claude/hooks/install-stack.sh" <<'HOOK'
+#!/usr/bin/env bash
+# SessionStart bootstrap for the tokenmaxxxer stack.
+#
+# Why this exists: the committed .claude/settings.json declares the marketplace
+# and enables the tokenmaxxxer-env bundle, and on a local CLI session that
+# declarative install runs after a one-time interactive trust prompt. A remote
+# (Claude Code on the web) session that runs non-interactively has nobody to
+# accept that prompt, so the plugins silently never install. An explicit
+# `claude plugin install` is an explicit action that does not need the passive
+# trust gate, so running it here is what actually lands the stack in a remote
+# container. Idempotent: a fast guard makes re-runs a near-instant no-op.
+set -uo pipefail
+
+# Only remote sessions have the gap. Local CLI sessions install via the
+# declarative settings + interactive trust as usual, so leave them alone.
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+# No CLI on PATH -> nothing to do; never break the session over it.
+command -v claude >/dev/null 2>&1 || exit 0
+
+MARKET="tokenmaxxxer"
+BUNDLE="tokenmaxxxer-env"
+GITHUB_REPO="tokenmaxxxer/claude-plugins"
+PLUGINS="freelunch terse blueprint no-mock scout no-footgun doctrine warrant dispatch"
+
+# Fast path: bundle already installed in this container -> exit silently.
+INSTALLED="${HOME}/.claude/plugins/installed_plugins.json"
+if [ -f "$INSTALLED" ] && grep -q "\"${BUNDLE}@${MARKET}\"" "$INSTALLED" 2>/dev/null; then
+  exit 0
+fi
+
+# Register the marketplace (idempotent) and refresh it once.
+if ! claude plugin marketplace list 2>/dev/null | grep -q "$MARKET"; then
+  claude plugin marketplace add "$GITHUB_REPO" >/dev/null 2>&1 || true
+fi
+claude plugin marketplace update "$MARKET" >/dev/null 2>&1 || true
+
+# Install each stack plugin explicitly, then the bundle. Explicit installs are
+# idempotent and converge even when a new plugin was added to the bundle later.
+for p in $PLUGINS; do
+  claude plugin install "${p}@${MARKET}" --scope user >/dev/null 2>&1 || true
+done
+claude plugin install "${BUNDLE}@${MARKET}" --scope user >/dev/null 2>&1 || true
+
+# Keep stdout clean: SessionStart hook output is injected into the session.
+exit 0
+HOOK
+  chmod +x "$root/.claude/hooks/install-stack.sh"
+  echo "    wrote $root/.claude/hooks/install-stack.sh"
+
+  # Merge the SessionStart hook into the project settings.json (idempotent).
+  python3 - "$root/.claude/settings.json" <<'PY'
+import json, os, sys
+
+path = sys.argv[1]
+cmd = "$CLAUDE_PROJECT_DIR/.claude/hooks/install-stack.sh"
+with open(path) as f:
+    settings = json.load(f)
+
+hooks = settings.setdefault("hooks", {})
+starts = hooks.setdefault("SessionStart", [])
+# Already registered? Leave it alone.
+present = any(
+    h.get("command") == cmd
+    for group in starts
+    for h in group.get("hooks", [])
+)
+if not present:
+    starts.append({"hooks": [{"type": "command", "command": cmd}]})
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(settings, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(tmp, path)
+    print(f"    registered SessionStart bootstrap hook in {path}")
+else:
+    print(f"    SessionStart bootstrap hook already registered in {path}")
+PY
+}
+
 if [ "$SCOPE" = "project" ]; then
   # Project settings only matter once committed to a repo, so refuse to scatter
   # a settings.json into an unrelated directory. Write at the repo root, which
@@ -137,15 +230,19 @@ if [ "$SCOPE" = "project" ]; then
   fi
   echo "==> installing at PROJECT scope: $REPO_ROOT/.claude/settings.json"
   write_settings "$REPO_ROOT/.claude/settings.json" || exit 1
+  write_bootstrap_hook "$REPO_ROOT" || exit 1
   cat <<'MSG'
-==> done (project scope). The plugin declaration is written, but it only takes
-    effect once committed:
-        git add .claude/settings.json
+==> done (project scope). The plugin declaration and the SessionStart bootstrap
+    hook are written, but they only take effect once committed:
+        git add .claude/settings.json .claude/hooks/install-stack.sh
         git commit -m "Add tokenmaxxxer plugin stack"
     After that, anyone who opens this repo — local CLI, Claude Code on the web,
     and Slack cloud sessions alike — gets the stack installed and enabled on
-    session start (after a one-time trust prompt). To install for your account
-    machine-wide instead, re-run with: install.sh --user
+    session start. Local CLI sessions install from the declarative settings
+    (after a one-time trust prompt); remote/web sessions, which run
+    non-interactively with no prompt to accept, are installed by the bootstrap
+    hook instead. To install for your account machine-wide, re-run with:
+    install.sh --user
 MSG
   exit 0
 fi
