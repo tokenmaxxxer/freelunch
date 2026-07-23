@@ -45,3 +45,55 @@ explicitly instead of always printing the success line. As written, the one guar
 this path (JSON validity check) is invisible to the operator: the ERROR line is the only signal,
 sandwiched between routine output, immediately followed by unconditional success messaging and a
 0 exit code that any calling script or CI step would read as "installed".
+
+## before-landing — stance 3: assume the rule as written cannot hold — find the state nothing maintains
+
+Verdict: FINDING — README claims the CLI-install path and the settings-only fallback "converge on exactly these two keys" with `enabledPlugins` holding only the bundle, but the CLI path's real, persisted `~/.claude/settings.json` ends up with 10 `enabledPlugins` entries (all 9 plugins plus the bundle), not the one-entry declaration shown.
+Kind: design-error
+Seed: README.md lines 42-89 (Install / Writing the settings by hand sections) vs install.sh's CLI loop (`for plugin in freelunch terse blueprint no-mock scout no-footgun doctrine warrant dispatch; do "$CLI" plugin install "$plugin@$MARKET" --scope user ...`) and its `write_settings()` fallback.
+
+### Reproduce
+```
+# CLI path: run install.sh with a real `claude` CLI on PATH and a scratch HOME
+export HOME=/tmp/testhome3   # scratch dir
+cd /home/user/claude-plugins
+bash install.sh
+cat "$HOME/.claude/settings.json"
+
+# Fallback path, same repo, forcing the settings-only branch
+export HOME=/tmp/testhome2   # different scratch dir
+cd /home/user/claude-plugins
+TOKENMAXXXER_SETTINGS_ONLY=1 bash install.sh
+cat "$HOME/.claude/settings.json"
+```
+
+### Observed
+CLI path's `~/.claude/settings.json`:
+```json
+{
+  "enabledPlugins": {
+    "freelunch@tokenmaxxxer": true,
+    "terse@tokenmaxxxer": true,
+    "blueprint@tokenmaxxxer": true,
+    "no-mock@tokenmaxxxer": true,
+    "scout@tokenmaxxxer": true,
+    "no-footgun@tokenmaxxxer": true,
+    "doctrine@tokenmaxxxer": true,
+    "warrant@tokenmaxxxer": true,
+    "dispatch@tokenmaxxxer": true,
+    "tokenmaxxxer-env@tokenmaxxxer": true
+  },
+  "extraKnownMarketplaces": { "tokenmaxxxer": { "source": { "source": "github", "repo": "tokenmaxxxer/claude-plugins" } } }
+}
+```
+Fallback path's `~/.claude/settings.json` (matches README's shown JSON):
+```json
+{
+  "extraKnownMarketplaces": { "tokenmaxxxer": { "source": { "source": "github", "repo": "tokenmaxxxer/claude-plugins" } } },
+  "enabledPlugins": { "tokenmaxxxer-env@tokenmaxxxer": true }
+}
+```
+The two on-disk declarations disagree on the very key the README singles out (`enabledPlugins`): 10 entries vs 1. This directly contradicts README.md line 44 ("Either path installs the same bundle the same way") and line 74 ("the declaration it converges on is exactly these two keys", followed by an example showing only the bundle enabled) — no code path makes the CLI's actual settings state match the single-entry declaration the README asserts both paths reach.
+
+### Expected
+Either README should not claim the two paths converge on the same settings declaration, or install.sh's CLI path should not persist per-plugin `enabledPlugins` entries beyond the bundle (matching what the fallback writes and what the README shows).
